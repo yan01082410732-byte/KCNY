@@ -1,0 +1,1 @@
+export default function ComingSoon() { return <main className="auth-page"><section className="auth-card"><a className="brand" href="/"><span>K</span>CNY</a><h1>Coming soon / 준비 중</h1><p>该功能即将开放。 / 이 기능은 곧 제공됩니다.</p></section></main>; }
