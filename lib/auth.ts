@@ -1,4 +1,7 @@
 export type Language = "CN" | "KR";
+export const AUTH_ERROR_REASONS=["missing_code","configuration","verification_failed","invalid_link"] as const;
+export type AuthErrorReason=(typeof AUTH_ERROR_REASONS)[number];
+export function isAuthErrorReason(value:unknown):value is AuthErrorReason{return typeof value==="string"&&AUTH_ERROR_REASONS.includes(value as AuthErrorReason);}
 
 export function isLanguage(value: unknown): value is Language { return value === "CN" || value === "KR"; }
 export function normalizeLanguage(value: unknown): Language { return value === "KR" ? "KR" : "CN"; }
