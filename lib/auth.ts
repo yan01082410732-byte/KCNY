@@ -121,5 +121,3 @@ export function validateResendConfirmation(input: {
   }
   return null;
 }
-
-export const validateProfile = validateSignUp;
