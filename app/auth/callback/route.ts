@@ -1,2 +1,3 @@
-import { NextResponse } from "next/server"; import { createClient } from "@/lib/supabase/server";
-export async function GET(r:Request){const u=new URL(r.url),c=u.searchParams.get("code"),n=u.searchParams.get("next"),s=await createClient();if(c&&s)await s.auth.exchangeCodeForSession(c);return NextResponse.redirect(new URL(n?.startsWith("/")&&!n.startsWith("//")?n:"/",u.origin));}
+import { NextResponse } from "next/server"; import { createClient } from "@/lib/supabase/server"; import { normalizeLanguage,safeReturnTo } from "@/lib/auth";
+export const dynamic="force-dynamic";
+export async function GET(request:Request){const url=new URL(request.url),lang=normalizeLanguage(url.searchParams.get("lang")),code=url.searchParams.get("code"),next=safeReturnTo(url.searchParams.get("next"));const error=(reason:string)=>NextResponse.redirect(new URL(`/auth/error?lang=${lang}&reason=${reason}`,url.origin));if(!code)return error("missing_code");const supabase=await createClient();if(!supabase)return error("configuration");if((await supabase.auth.exchangeCodeForSession(code)).error)return error("verification_failed");return NextResponse.redirect(new URL(next,url.origin));}
