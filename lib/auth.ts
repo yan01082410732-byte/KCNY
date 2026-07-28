@@ -1,21 +1,28 @@
-export type Language = "zh" | "ko";
+export type Language = "CN" | "KR";
 
-export function isLanguage(value: unknown): value is Language {
-  return value === "zh" || value === "ko";
+export function isLanguage(value: unknown): value is Language { return value === "CN" || value === "KR"; }
+export function normalizeLanguage(value: unknown): Language { return value === "KR" ? "KR" : "CN"; }
+export function htmlLanguage(value: Language) { return value === "KR" ? "ko-KR" : "zh-CN"; }
+export function safeReturnTo(value: unknown) {
+  if (typeof value !== "string" || !value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || /[\x00-\x1f]/.test(value)) return "/";
+  let decoded = value;
+  for (let i=0;i<2;i++) { try { decoded=decodeURIComponent(decoded); } catch { return "/"; } }
+  return decoded.startsWith("/") && !decoded.startsWith("//") && !decoded.includes("\\") ? value : "/";
 }
-
-export function safeReturnTo(value: FormDataEntryValue | string | null) {
-  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return "/";
-  try {
-    const decoded = decodeURIComponent(value);
-    return decoded.startsWith("/") && !decoded.startsWith("//") && !decoded.includes("\\") ? value : "/";
-  } catch { return "/"; }
-}
-export function validateProfile(input: { username: string; displayName: string; email: string; password: string; confirmPassword: string }) {
-  if (!/^[A-Za-z0-9_\u4e00-\u9fff\uac00-\ud7af]{2,30}$/u.test(input.username)) return "invalid_username";
-  if (input.displayName.trim().length < 1 || input.displayName.trim().length > 50) return "invalid_display_name";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) return "invalid_email";
-  if (input.password.length < 8) return "weak_password";
-  if (input.password !== input.confirmPassword) return "password_mismatch";
+const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export function validateSignUp(input:{username:string;displayName:string;email:string;password:string;confirmPassword:string;preferredLanguage:unknown}) {
+  if(!/^[A-Za-z0-9_\u4e00-\u9fff\uac00-\ud7af]{2,30}$/u.test(input.username)) return "invalid_username";
+  if(input.displayName.trim().length<1||input.displayName.trim().length>50)return "invalid_display_name";
+  if(!email.test(input.email))return "invalid_email";
+  if(input.password.length<8)return "weak_password";
+  if(input.password!==input.confirmPassword)return "password_mismatch";
+  if(!isLanguage(input.preferredLanguage))return "invalid_language";
   return null;
 }
+export function validateSignIn(input:{email:string;password:string;language:unknown;returnTo:unknown}) {
+  if(!isLanguage(input.language))return "invalid_language";
+  if(!email.test(input.email))return "invalid_email";
+  if(!input.password)return "invalid_password";
+  return null;
+}
+export const validateProfile = validateSignUp;
