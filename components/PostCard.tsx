@@ -1,5 +1,17 @@
-export type Post = { id: number; author: string; place: string; time: string; avatar: string; title: string; body: string; tags: string[]; comments: number; accent: "coral" | "blue" | "yellow" };
+import type { Language } from "@/lib/auth";
+import { formatPostDate, postAvatarInitial, type PublicPost } from "@/lib/posts";
 
-export function PostCard({ post }: { post: Post }) {
-  return <article className="post-card"><div className={`avatar ${post.accent}`}>{post.avatar}</div><div className="post-main"><div className="post-meta"><strong>{post.author}</strong><span>{post.place}</span><span>·</span><span>{post.time}</span></div><h3>{post.title}</h3><p>{post.body}</p><div className="post-bottom"><div className="tags">{post.tags.map((tag) => <span key={tag}>{tag}</span>)}</div><button>◌ {post.comments}</button></div></div></article>;
+export function PostCard({ post, language }: { post: PublicPost; language: Language }) {
+  const author = post.author;
+  if (!author) return null;
+  const postHref = `/posts/${encodeURIComponent(post.id)}?lang=${language}`;
+  return <article className="post-card">
+    <div className="avatar coral" aria-hidden="true">{postAvatarInitial(author)}</div>
+    <div className="post-main">
+      <div className="post-meta"><strong>{author.display_name || author.username}</strong><span>@{author.username}</span><span>·</span><span>{formatPostDate(post.created_at, language)}</span></div>
+      <h3><a href={postHref}>{post.title}</a></h3>
+      <p>{post.content.length > 180 ? `${post.content.slice(0, 180)}…` : post.content}</p>
+      <div className="post-bottom"><div className="tags"><span>{post.language === "KR" ? "한국어" : "中文"}</span></div><a className="post-read" href={postHref}>{language === "KR" ? "자세히 보기" : "查看详情"}</a></div>
+    </div>
+  </article>;
 }

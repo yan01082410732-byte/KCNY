@@ -34,7 +34,7 @@ export function UserMenu({ language, username, displayName }: { language: Langua
     {open && <div className="user-menu-panel" role="menu" aria-label={labels.menu}>
       {profileHref ? <a role="menuitem" href={profileHref} onClick={() => setOpen(false)}>{labels.profile}</a> : <span role="menuitem" aria-disabled="true" className="user-menu-disabled">{labels.profileUnavailable}</span>}
       <a role="menuitem" href={`/settings/profile?lang=${language}`} onClick={() => setOpen(false)}>{labels.settings}</a>
-      <a role="menuitem" href="/coming-soon" onClick={() => setOpen(false)}>{labels.createPost}</a>
+      <a role="menuitem" href={`/posts/new?lang=${language}`} onClick={() => setOpen(false)}>{labels.createPost}</a>
       <form action="/auth/signout" method="post"><button role="menuitem" type="submit" onClick={() => setOpen(false)}>{labels.signOut}</button></form>
     </div>}
   </div>;

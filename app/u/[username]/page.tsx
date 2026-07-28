@@ -3,6 +3,7 @@ import { ProfilePageClient } from "@/components/ProfilePageClient";
 import { normalizeLanguage } from "@/lib/auth";
 import { isSafeUsername, PUBLIC_PROFILE_FIELDS, type PublicProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
+import { toPublicPosts } from "@/lib/posts";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function PublicProfilePage({ params, searchParams }: { para
   const supabase = await createClient();
   if (!supabase) notFound();
 
-  const { data: profile, error } = await supabase.from("profiles").select(PUBLIC_PROFILE_FIELDS).eq("username", username).maybeSingle();
+  const { data: profile, error } = await supabase.from("profiles").select(`${PUBLIC_PROFILE_FIELDS}, id`).eq("username", username).maybeSingle();
   if (error || !profile) notFound();
 
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -28,5 +29,12 @@ export default async function PublicProfilePage({ params, searchParams }: { para
     currentDisplayName = currentProfile?.display_name ?? undefined;
   }
 
-  return <ProfilePageClient profile={profile as PublicProfile} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("id, author_id, title, content, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)")
+    .eq("author_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  return <ProfilePageClient profile={profile as PublicProfile} posts={toPublicPosts(posts ?? [])} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;
 }
