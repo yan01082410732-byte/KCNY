@@ -1,5 +1,7 @@
 import type { Language } from "@/lib/auth";
 
+export const KCNY_DISPLAY_TIME_ZONE = "Asia/Seoul";
+
 export const POST_FIELDS = "id, title, content, category, language, created_at, author_id";
 export const POST_CATEGORIES = ["culture", "language", "travel", "study", "daily", "other"] as const;
 export type PostCategory = (typeof POST_CATEGORIES)[number];
@@ -100,8 +102,19 @@ export function formatPostDate(value: string, language: Language) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat(language === "KR" ? "ko-KR" : "zh-CN", {
+    timeZone: KCNY_DISPLAY_TIME_ZONE,
     year: "numeric",
     month: "short",
     day: "numeric",
+  }).format(date);
+}
+
+export function formatKcnyMonth(value: string, language: Language) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(language === "KR" ? "ko-KR" : "zh-CN", {
+    timeZone: KCNY_DISPLAY_TIME_ZONE,
+    year: "numeric",
+    month: "long",
   }).format(date);
 }

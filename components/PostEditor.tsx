@@ -28,6 +28,9 @@ export function PostEditor({
   const [postLanguage, setPostLanguage] = useState<Language>(post.language);
   const [category, setCategory] = useState<PostCategory>(post.category);
   const korean = language === "KR";
+  const postLanguageOptions = korean
+    ? { CN: "중국어", KR: "한국어" }
+    : { CN: "中文", KR: "韩文" };
   const text = korean
     ? {
         heading: "게시글 수정",
@@ -79,8 +82,8 @@ export function PostEditor({
           <label htmlFor="postLanguage">
             {text.postLanguage}
             <select id="postLanguage" value={postLanguage} onChange={(event) => setPostLanguage(event.target.value as Language)}>
-              <option value="CN">中文</option>
-              <option value="KR">한국어</option>
+              <option value="CN">{postLanguageOptions.CN}</option>
+              <option value="KR">{postLanguageOptions.KR}</option>
             </select>
           </label>
           <input type="hidden" name="language" value={postLanguage} />

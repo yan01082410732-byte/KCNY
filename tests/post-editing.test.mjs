@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import {
+  KCNY_DISPLAY_TIME_ZONE,
+  formatKcnyMonth,
+  formatPostDate,
   isPostCategory,
   isSafePostId,
   validatePostInput,
@@ -16,6 +19,7 @@ const detailClient = read("components/PostDetailClient.tsx");
 const detailPage = read("app/posts/[id]/page.tsx");
 const editor = read("components/PostEditor.tsx");
 const styles = read("app/globals.css");
+const profileClient = read("components/ProfilePageClient.tsx");
 
 const validInput = (overrides = {}) => ({
   title: "A title",
@@ -168,4 +172,64 @@ test("post detail keeps delete and edit controls together", () => {
 
 test("post editor mobile card styling is retained", () => {
   assert.match(styles, /\.post-composer-card \{ padding:24px; \}/);
+});
+
+test("post dates use the KCNY display time zone", () => {
+  assert.equal(KCNY_DISPLAY_TIME_ZONE, "Asia/Seoul");
+  assert.match(read("lib/posts.ts"), /timeZone: KCNY_DISPLAY_TIME_ZONE/);
+});
+
+test("post date is stable at the Asia Seoul day boundary in CN", () => {
+  assert.equal(formatPostDate("2026-07-29T16:30:00.000Z", "CN"), "2026年7月30日");
+});
+
+test("post date is stable at the Asia Seoul day boundary in KR", () => {
+  assert.equal(formatPostDate("2026-07-29T16:30:00.000Z", "KR"), "2026년 7월 30일");
+});
+
+test("post date formatting is deterministic across repeated calls", () => {
+  const value = "2026-07-29T16:30:00.000Z";
+  assert.equal(formatPostDate(value, "CN"), formatPostDate(value, "CN"));
+  assert.equal(formatPostDate(value, "KR"), formatPostDate(value, "KR"));
+});
+
+test("profile registration month uses the same deterministic time zone", () => {
+  assert.equal(formatKcnyMonth("2026-07-29T16:30:00.000Z", "CN"), "2026年7月");
+  assert.match(profileClient, /formatKcnyMonth\(profile\.created_at, language\)/);
+});
+
+test("post and comment dates share the deterministic post date formatter", () => {
+  assert.match(detailClient, /formatPostDate\(post\.created_at, activeLanguage\)/);
+  assert.match(detailClient, /formatPostDate\(comment\.createdAt, language\)/);
+});
+
+test("the project does not suppress hydration warnings", () => {
+  for (const source of [editor, detailClient, profileClient, styles]) {
+    assert.doesNotMatch(source, /suppressHydrationWarning/);
+  }
+});
+
+test("rendered post code does not use current time or random values", () => {
+  const sources = [read("app/posts/[id]/page.tsx"), detailClient, editor, profileClient];
+  for (const source of sources) {
+    assert.doesNotMatch(source, /Date\.now|Math\.random/);
+  }
+});
+
+test("post editor CN language labels are Chinese and Korean", () => {
+  assert.match(editor, /CN: "中文", KR: "韩文"/);
+});
+
+test("post editor KR language labels are Korean", () => {
+  assert.match(editor, /CN: "중국어", KR: "한국어"/);
+});
+
+test("post editor language select retains CN and KR values", () => {
+  assert.match(editor, /<option value="CN">\{postLanguageOptions\.CN\}<\/option>/);
+  assert.match(editor, /<option value="KR">\{postLanguageOptions\.KR\}<\/option>/);
+});
+
+test("post editor initial state comes from the server post", () => {
+  assert.match(editor, /useState<Language>\(post\.language\)/);
+  assert.match(editor, /useState<PostCategory>\(post\.category\)/);
 });
