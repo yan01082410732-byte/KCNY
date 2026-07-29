@@ -23,7 +23,7 @@ export default async function HomePage() {
 
     const { data } = await supabase
       .from("posts")
-      .select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)")
+      .select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name), comments(count)")
       .order("created_at", { ascending: false })
       .limit(20);
     posts = toPublicPosts(data ?? []);

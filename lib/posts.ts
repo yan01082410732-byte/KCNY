@@ -27,6 +27,7 @@ export type PublicPost = {
   category: PostCategory;
   language: Language;
   created_at: string;
+  comment_count: number;
   author_id: string;
   author: {
     username: string;
@@ -50,6 +51,10 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       !author ||
       typeof author.username !== "string"
     ) return [];
+    const commentRelation = Array.isArray(value.comments) ? value.comments[0] : value.comments;
+    const commentCount = commentRelation && typeof (commentRelation as Record<string, unknown>).count === "number"
+      ? (commentRelation as Record<string, number>).count
+      : 0;
     return [{
       id: value.id,
       author_id: value.author_id,
@@ -58,6 +63,7 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       category: value.category,
       language: value.language,
       created_at: value.created_at,
+      comment_count: commentCount,
       author: { username: author.username, display_name: typeof author.display_name === "string" ? author.display_name : null },
     }];
   });

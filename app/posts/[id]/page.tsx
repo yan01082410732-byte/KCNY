@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PostDetailClient } from "@/components/PostDetailClient";
+import { toPublicComments } from "@/lib/comments";
 import { isSafePostId, toPublicPosts } from "@/lib/posts";
 import { normalizeLanguage } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -25,5 +26,12 @@ export default async function PostDetailPage({ params, searchParams }: { params:
     currentUsername = profile?.username;
     currentDisplayName = profile?.display_name ?? undefined;
   }
-  return <PostDetailClient post={publicPost} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canDelete={post.author_id === currentUserId} />;
+  const { data: comments, error: commentsError } = await supabase
+    .from("comments")
+    .select("id, post_id, author_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")
+    .eq("post_id", id)
+    .order("created_at", { ascending: true })
+    .limit(100);
+
+  return <PostDetailClient post={publicPost} comments={toPublicComments(comments ?? [], currentUserId)} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canDelete={post.author_id === currentUserId} />;
 }
