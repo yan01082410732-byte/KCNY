@@ -32,6 +32,7 @@ test("public profile avatar uses display name first character",()=>assert.equal(
 test("user menu CN labels",()=>assert.equal(userMenuLabels("CN").profile,"我的主页"));
 test("user menu KR labels",()=>assert.equal(userMenuLabels("KR").settings,"프로필 편집"));
 test("user menu profile link encodes a valid username",()=>assert.equal(userMenuProfileHref("test_user"),"/u/test_user"));
+test("user menu profile link preserves the selected language",()=>assert.equal(userMenuProfileHref("test_user","KR"),"/u/test_user?lang=KR"));
 test("user menu missing username has no profile link",()=>assert.equal(userMenuProfileHref(undefined),undefined));
 test("user menu rejects unsafe profile usernames",()=>assert.equal(userMenuProfileHref("../unsafe"),undefined));
 test("user menu avatar uses display name first",()=>assert.equal(userMenuAvatarInitial("测试名","fallback"),"测"));
@@ -39,6 +40,9 @@ test("user menu avatar falls back to username",()=>assert.equal(userMenuAvatarIn
 test("user menu avatar final fallback is K",()=>assert.equal(userMenuAvatarInitial(),"K"));
 test("user menu is initially aria collapsed",()=>assert.equal(userMenuButtonState(false)["aria-expanded"],false));
 test("user menu exposes menu popup semantics",()=>assert.equal(userMenuButtonState(false)["aria-haspopup"],"menu"));
+test("home page forwards the normalized query language to its client component",()=>{const source=readFileSync("app/page.tsx","utf8");assert.match(source,/searchParams: Promise<\{ lang\?: string \}>/);assert.match(source,/initialLanguage=\{initialLanguage\}/);});
+test("home page client initializes language from its server prop",()=>{const source=readFileSync("components/HomePageClient.tsx","utf8");assert.match(source,/useState<Language>\(initialLanguage\)/);assert.doesNotMatch(source,/useState<"CN" \| "KR">\("CN"\)/);});
+test("narrow layout uses targeted sizing rather than hiding horizontal overflow",()=>{const source=readFileSync("app/globals.css","utf8");assert.match(source,/@media \(max-width:320px\)/);assert.doesNotMatch(source,/overflow-x\s*:\s*hidden/);});
 test("user menu closes on Escape",()=>assert.equal(shouldCloseUserMenuForKey("Escape"),true));
 test("user menu ignores ordinary keys",()=>assert.equal(shouldCloseUserMenuForKey("Enter"),false));
 test("user menu signout remains a POST submit without closing before submission",()=>{const source=readFileSync(new URL("../components/UserMenu.tsx",import.meta.url),"utf8");assert.match(source,/<form action="\/auth\/signout" method="post"><button role="menuitem" type="submit">/);assert.doesNotMatch(source,/<button role="menuitem" type="submit" onClick=/);});

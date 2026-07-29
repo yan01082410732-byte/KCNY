@@ -5,9 +5,9 @@ export function userMenuAvatarInitial(displayName?: string, username?: string) {
   return Array.from(source)[0] || "K";
 }
 
-export function userMenuProfileHref(username?: string) {
+export function userMenuProfileHref(username?: string, language?: UserMenuLanguage) {
   return username && /^[A-Za-z0-9_\u4e00-\u9fff\uac00-\ud7af]{2,30}$/u.test(username)
-    ? `/u/${encodeURIComponent(username)}`
+    ? `/u/${encodeURIComponent(username)}${language ? `?lang=${language}` : ""}`
     : undefined;
 }
 
