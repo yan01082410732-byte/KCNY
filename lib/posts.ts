@@ -15,6 +15,11 @@ export function postCategoryLabel(category: PostCategory, language: Language) {
   return labels[category];
 }
 
+export function postLanguageLabel(postLanguage: Language, language: Language) {
+  if (language === "KR") return postLanguage === "KR" ? "한국어" : "중국어";
+  return postLanguage === "KR" ? "韩文" : "中文";
+}
+
 export type PublicPost = {
   id: string;
   title: string;

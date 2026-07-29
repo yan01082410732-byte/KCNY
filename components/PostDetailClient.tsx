@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { deletePost } from "@/app/posts/actions";
-import { formatPostDate, postAvatarInitial, postCategoryLabel, type PublicPost } from "@/lib/posts";
+import { formatPostDate, postAvatarInitial, postCategoryLabel, postLanguageLabel, type PublicPost } from "@/lib/posts";
 import type { Language } from "@/lib/auth";
 
 export function PostDetailClient({ post, language, authenticated, currentUsername, currentDisplayName, canDelete }: { post: PublicPost; language: Language; authenticated: boolean; currentUsername?: string; currentDisplayName?: string; canDelete: boolean }) {
@@ -11,7 +11,7 @@ export function PostDetailClient({ post, language, authenticated, currentUsernam
   const korean = activeLanguage === "KR";
   const author = post.author;
   if (!author) return null;
-  return <main><Header language={activeLanguage} onLanguageChange={setActiveLanguage} authenticated={authenticated} username={currentUsername} displayName={currentDisplayName} /><section className="shell post-detail-page"><article className="post-detail-card"><div className="post-detail-author"><div className="avatar coral" aria-hidden="true">{postAvatarInitial(author)}</div><div><a href={`/u/${encodeURIComponent(author.username)}?lang=${activeLanguage}`}>{author.display_name || author.username}</a><p>@{author.username} · {formatPostDate(post.created_at, activeLanguage)}</p></div></div><p className="post-language">{postCategoryLabel(post.category, activeLanguage)} · {post.language === "KR" ? "한국어" : "中文"}</p><h1>{post.title}</h1><p className="post-detail-content">{post.content}</p>{canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}</article></section></main>;
+  return <main><Header language={activeLanguage} onLanguageChange={setActiveLanguage} authenticated={authenticated} username={currentUsername} displayName={currentDisplayName} /><section className="shell post-detail-page"><article className="post-detail-card"><div className="post-detail-author"><div className="avatar coral" aria-hidden="true">{postAvatarInitial(author)}</div><div><a href={`/u/${encodeURIComponent(author.username)}?lang=${activeLanguage}`}>{author.display_name || author.username}</a><p>@{author.username} · {formatPostDate(post.created_at, activeLanguage)}</p></div></div><p className="post-language">{postCategoryLabel(post.category, activeLanguage)} · {postLanguageLabel(post.language, activeLanguage)}</p><h1>{post.title}</h1><p className="post-detail-content">{post.content}</p>{canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}</article></section></main>;
 }
 
 function DeletePostControl({ postId, language, korean }: { postId: string; language: Language; korean: boolean }) {
