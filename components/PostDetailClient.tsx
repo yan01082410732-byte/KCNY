@@ -26,6 +26,7 @@ type Props = {
   authenticated: boolean;
   currentUsername?: string;
   currentDisplayName?: string;
+  canEdit: boolean;
   canDelete: boolean;
 };
 
@@ -37,6 +38,7 @@ export function PostDetailClient({
   authenticated,
   currentUsername,
   currentDisplayName,
+  canEdit,
   canDelete,
 }: Props) {
   const [activeLanguage, setActiveLanguage] = useState(language);
@@ -59,7 +61,10 @@ export function PostDetailClient({
           <p className="post-language">{postCategoryLabel(post.category, activeLanguage)} · {postLanguageLabel(post.language, activeLanguage)}</p>
           <h1>{post.title}</h1>
           <p className="post-detail-content">{post.content}</p>
-          {canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}
+          {(canEdit || canDelete) && <div className="post-owner-actions">
+            {canEdit && <a className="button secondary" href={`/posts/${encodeURIComponent(post.id)}/edit?lang=${activeLanguage}`}>{korean ? "게시글 수정" : "编辑帖子"}</a>}
+            {canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}
+          </div>}
         </article>
 
         <section id="comments" className="comments-section" aria-label={korean ? "댓글" : "评论"}>

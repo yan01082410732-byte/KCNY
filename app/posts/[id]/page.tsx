@@ -33,5 +33,5 @@ export default async function PostDetailPage({ params, searchParams }: { params:
     .order("created_at", { ascending: true })
     .limit(100);
 
-  return <PostDetailClient post={publicPost} comments={toPublicComments(comments ?? [], currentUserId)} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canDelete={post.author_id === currentUserId} />;
+  return <PostDetailClient post={publicPost} comments={toPublicComments(comments ?? [], currentUserId)} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canEdit={post.author_id === currentUserId} canDelete={post.author_id === currentUserId} />;
 }

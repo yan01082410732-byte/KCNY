@@ -39,3 +39,48 @@ export async function deletePost(formData: FormData) {
   if (error) redirect(`/posts/${postId}?lang=${language}&error=delete_failed`);
   redirect(profile?.username ? `/u/${encodeURIComponent(profile.username)}?lang=${language}` : "/");
 }
+
+export async function updatePost(formData: FormData) {
+  const rawLanguage = formData.get("language");
+  const language = normalizeLanguage(rawLanguage);
+  const postId = formData.get("postId");
+
+  if (!isLanguage(rawLanguage) || !isSafePostId(postId)) redirect("/");
+
+  const result = validatePostInput({
+    title: formData.get("title"),
+    content: formData.get("content"),
+    category: formData.get("category"),
+    language: rawLanguage,
+  });
+  if (result.error) {
+    redirect(`/posts/${postId}/edit?lang=${language}&error=${result.error}`);
+  }
+
+  const supabase = await createClient();
+  if (!supabase) {
+    redirect(`/posts/${postId}/edit?lang=${language}&error=configuration`);
+  }
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims?.sub;
+  if (!userId) {
+    redirect(`/auth/login?lang=${language}&returnTo=/posts/${postId}/edit`);
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      title: result.title,
+      content: result.content,
+      category: result.category,
+      language: result.language,
+    })
+    .eq("id", postId)
+    .eq("author_id", userId);
+
+  if (error) {
+    redirect(`/posts/${postId}/edit?lang=${language}&error=update_failed`);
+  }
+
+  redirect(`/posts/${postId}?lang=${language}`);
+}
