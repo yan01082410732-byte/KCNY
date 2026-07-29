@@ -1,10 +1,19 @@
 import { HomePageClient } from "@/components/HomePageClient";
+import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const { lang: rawLanguage } = await searchParams;
+  const initialLanguage = isLanguage(rawLanguage)
+    ? rawLanguage
+    : normalizeLanguage(rawLanguage);
   let authenticated = false;
   let username: string | undefined;
   let displayName: string | undefined;
@@ -29,5 +38,13 @@ export default async function HomePage() {
     posts = toPublicPosts(data ?? []);
   }
 
-  return <HomePageClient authenticated={authenticated} username={username} displayName={displayName} posts={posts} />;
+  return (
+    <HomePageClient
+      authenticated={authenticated}
+      username={username}
+      displayName={displayName}
+      posts={posts}
+      initialLanguage={initialLanguage}
+    />
+  );
 }

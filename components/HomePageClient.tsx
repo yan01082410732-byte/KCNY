@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { PostCard } from "@/components/PostCard";
+import type { Language } from "@/lib/auth";
 import type { PublicPost } from "@/lib/posts";
 import { POST_CATEGORIES, postCategoryLabel, type PostCategory } from "@/lib/posts";
 
@@ -11,8 +12,8 @@ const copy = {
   KR: { eyebrow: "중국 × 한국, 더 가까이", title: "언어를 넘어,\n서로를 만나요.", description: "중국과 한국 문화를 좋아하는 사람들을 위한 따뜻한 커뮤니티입니다. 이야기하고, 배우고, 질문하며 새로운 친구를 만나 보세요.", explore: "둘러보기", create: "글 쓰기", feed: "지금 이야기", all: "전체", cn: "중국어", kr: "한국어", empty: "아직 게시글이 없습니다. 첫 번째 이야기를 들려주세요.", welcome: "KCNY에 오신 것을 환영합니다" },
 };
 
-export function HomePageClient({ authenticated, username, displayName, posts }: { authenticated: boolean; username?: string; displayName?: string; posts: PublicPost[] }) {
-  const [language, setLanguage] = useState<"CN" | "KR">("CN");
+export function HomePageClient({ authenticated, username, displayName, posts, initialLanguage }: { authenticated: boolean; username?: string; displayName?: string; posts: PublicPost[]; initialLanguage: Language }) {
+  const [language, setLanguage] = useState<Language>(initialLanguage);
   const [activeCategory, setActiveCategory] = useState<"All" | PostCategory>("All");
   const text = copy[language];
   const shownPosts = activeCategory === "All" ? posts : posts.filter((post) => post.category === activeCategory);

@@ -8,7 +8,7 @@ export function UserMenu({ language, username, displayName }: { language: Langua
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const labels = userMenuLabels(language);
-  const profileHref = userMenuProfileHref(username);
+  const profileHref = userMenuProfileHref(username, language);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
