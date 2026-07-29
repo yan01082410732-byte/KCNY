@@ -12,7 +12,7 @@ export default async function PostDetailPage({ params, searchParams }: { params:
   if (!isSafePostId(id)) notFound();
   const supabase = await createClient();
   if (!supabase) notFound();
-  const { data: post, error } = await supabase.from("posts").select("id, author_id, title, content, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)").eq("id", id).maybeSingle();
+  const { data: post, error } = await supabase.from("posts").select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)").eq("id", id).maybeSingle();
   const publicPost = toPublicPosts(post ? [post] : [])[0];
   if (error || !post || !publicPost) notFound();
 

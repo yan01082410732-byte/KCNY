@@ -31,7 +31,7 @@ export default async function PublicProfilePage({ params, searchParams }: { para
 
   const { data: posts } = await supabase
     .from("posts")
-    .select("id, author_id, title, content, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)")
+    .select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)")
     .eq("author_id", profile.id)
     .order("created_at", { ascending: false })
     .limit(20);

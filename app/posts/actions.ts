@@ -9,7 +9,7 @@ export async function createPost(formData: FormData) {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
   if (!isLanguage(rawLanguage)) redirect(`/posts/new?lang=${language}&error=invalid_language`);
-  const result = validatePostInput({ title: formData.get("title"), content: formData.get("content"), language: rawLanguage });
+  const result = validatePostInput({ title: formData.get("title"), content: formData.get("content"), category: formData.get("category"), language: rawLanguage });
   if (result.error) redirect(`/posts/new?lang=${language}&error=${result.error}`);
 
   const supabase = await createClient();
@@ -18,7 +18,7 @@ export async function createPost(formData: FormData) {
   const userId = claimsData?.claims?.sub;
   if (!userId) redirect(`/auth/login?lang=${language}&returnTo=/posts/new`);
 
-  const { data, error } = await supabase.from("posts").insert({ author_id: userId, title: result.title, content: result.content, language: result.language }).select("id").single();
+  const { data, error } = await supabase.from("posts").insert({ author_id: userId, title: result.title, content: result.content, category: result.category, language: result.language }).select("id").single();
   if (error || !isSafePostId(data?.id)) redirect(`/posts/new?lang=${language}&error=publish_failed`);
   redirect(`/posts/${data.id}?lang=${language}`);
 }

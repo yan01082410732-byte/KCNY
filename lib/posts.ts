@@ -1,11 +1,25 @@
 import type { Language } from "@/lib/auth";
 
-export const POST_FIELDS = "id, title, content, language, created_at, author_id";
+export const POST_FIELDS = "id, title, content, category, language, created_at, author_id";
+export const POST_CATEGORIES = ["culture", "language", "travel", "study", "daily", "other"] as const;
+export type PostCategory = (typeof POST_CATEGORIES)[number];
+
+export function isPostCategory(value: unknown): value is PostCategory {
+  return typeof value === "string" && POST_CATEGORIES.includes(value as PostCategory);
+}
+
+export function postCategoryLabel(category: PostCategory, language: Language) {
+  const labels = language === "KR"
+    ? { culture: "문화 교류", language: "언어 학습", travel: "여행", study: "유학 생활", daily: "일상", other: "기타" }
+    : { culture: "文化交流", language: "语言学习", travel: "旅行", study: "留学生活", daily: "日常", other: "其他" };
+  return labels[category];
+}
 
 export type PublicPost = {
   id: string;
   title: string;
   content: string;
+  category: PostCategory;
   language: Language;
   created_at: string;
   author_id: string;
@@ -25,6 +39,7 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       typeof value.author_id !== "string" ||
       typeof value.title !== "string" ||
       typeof value.content !== "string" ||
+      !isPostCategory(value.category) ||
       (value.language !== "CN" && value.language !== "KR") ||
       typeof value.created_at !== "string" ||
       !author ||
@@ -35,6 +50,7 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       author_id: value.author_id,
       title: value.title,
       content: value.content,
+      category: value.category,
       language: value.language,
       created_at: value.created_at,
       author: { username: author.username, display_name: typeof author.display_name === "string" ? author.display_name : null },
@@ -50,6 +66,7 @@ export function isSafePostId(value: unknown): value is string {
 export function validatePostInput(input: {
   title: unknown;
   content: unknown;
+  category: unknown;
   language: unknown;
 }) {
   const title = typeof input.title === "string" ? input.title.trim() : "";
@@ -57,9 +74,10 @@ export function validatePostInput(input: {
 
   if (title.length < 1 || title.length > 120) return { error: "invalid_title" as const };
   if (content.length < 1 || content.length > 5000) return { error: "invalid_content" as const };
+  if (!isPostCategory(input.category)) return { error: "invalid_category" as const };
   if (input.language !== "CN" && input.language !== "KR") return { error: "invalid_language" as const };
 
-  return { error: null, title, content, language: input.language };
+  return { error: null, title, content, category: input.category, language: input.language };
 }
 
 export function postAvatarInitial(author: { username: string; display_name: string | null }) {
