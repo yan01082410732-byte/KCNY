@@ -42,6 +42,7 @@ test("user menu exposes menu popup semantics",()=>assert.equal(userMenuButtonSta
 test("user menu closes on Escape",()=>assert.equal(shouldCloseUserMenuForKey("Escape"),true));
 test("user menu ignores ordinary keys",()=>assert.equal(shouldCloseUserMenuForKey("Enter"),false));
 test("user menu signout remains a POST submit without closing before submission",()=>{const source=readFileSync(new URL("../components/UserMenu.tsx",import.meta.url),"utf8");assert.match(source,/<form action="\/auth\/signout" method="post"><button role="menuitem" type="submit">/);assert.doesNotMatch(source,/<button role="menuitem" type="submit" onClick=/);});
+test("signout route clears session cookies on its redirect response",()=>{const source=readFileSync(new URL("../app/auth/signout/route.ts",import.meta.url),"utf8");assert.match(source,/response\.cookies\.set\(name, value, options\)/);assert.match(source,/NextResponse\.redirect\(new URL\("\/", request\.url\), 303\)/);});
 test("post accepts trimmed CN input",()=>assert.equal(validatePostInput({title:" Title ",content:" Content ",category:"culture",language:"CN"}).error,null));
 test("post accepts KR input",()=>assert.equal(validatePostInput({title:"제목",content:"내용",category:"study",language:"KR"}).error,null));
 test("post rejects empty title",()=>assert.equal(validatePostInput({title:" ",content:"content",language:"CN"}).error,"invalid_title"));
