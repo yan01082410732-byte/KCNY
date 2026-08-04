@@ -41,6 +41,7 @@ header { height:76px; background:rgba(251,250,247,.93); border-bottom:1px solid 
   .filters { gap:6px; }
   .filters button { flex:none; padding:7px 12px; }
   .post-card,.post-detail-card,.comments-section,.profile-card,.auth-card { min-width:0; padding-left:16px; padding-right:16px; }
+  .profile-heading,.profile-details { min-width:0; }
   .post-meta,.post-bottom,.tags { min-width:0; flex-wrap:wrap; }
   .post-card h3,.post-card p,.post-detail-content,.profile-details dd,.comment-main > p { overflow-wrap:anywhere; word-break:break-word; }
   input,textarea,select { width:100%; max-width:100%; min-width:0; }
