@@ -1,5 +1,9 @@
 export type UserMenuLanguage = "CN" | "KR";
 
+type UserMenuPointerContainer = {
+  contains(target: Node | null): boolean;
+};
+
 export function userMenuAvatarInitial(displayName?: string, username?: string) {
   const source = displayName?.trim() || username?.trim() || "K";
   return Array.from(source)[0] || "K";
@@ -23,4 +27,11 @@ export function userMenuButtonState(open: boolean) {
 
 export function shouldCloseUserMenuForKey(key: string) {
   return key === "Escape";
+}
+
+export function shouldCloseUserMenuForPointerTarget(
+  container: UserMenuPointerContainer | null,
+  target: Node | null,
+) {
+  return Boolean(container && target && !container.contains(target));
 }

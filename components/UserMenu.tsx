@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Language } from "@/lib/auth";
-import { shouldCloseUserMenuForKey, userMenuAvatarInitial, userMenuButtonState, userMenuLabels, userMenuProfileHref } from "@/lib/user-menu";
+import {
+  shouldCloseUserMenuForKey,
+  shouldCloseUserMenuForPointerTarget,
+  userMenuAvatarInitial,
+  userMenuButtonState,
+  userMenuLabels,
+  userMenuProfileHref,
+} from "@/lib/user-menu";
 
 export function UserMenu({ language, username, displayName }: { language: Language; username?: string; displayName?: string }) {
   const [open, setOpen] = useState(false);
@@ -11,18 +18,27 @@ export function UserMenu({ language, username, displayName }: { language: Langua
   const profileHref = userMenuProfileHref(username, language);
 
   useEffect(() => {
-    function onPointerDown(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setOpen(false);
+    if (!open) return;
+
+    function onPointerDown(event: PointerEvent) {
+      if (shouldCloseUserMenuForPointerTarget(menuRef.current, event.target as Node | null)) {
+        setOpen(false);
+      }
     }
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (shouldCloseUserMenuForKey(event.key)) setOpen(false);
     }
-    document.addEventListener("mousedown", onPointerDown);
+
     document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   return <div className="user-menu" ref={menuRef}>
