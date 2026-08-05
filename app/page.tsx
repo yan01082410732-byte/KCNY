@@ -1,6 +1,7 @@
 import { HomePageClient } from "@/components/HomePageClient";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
+import { applyPostLikeState } from "@/lib/post-likes";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,14 @@ export default async function HomePage({
       .order("created_at", { ascending: false })
       .limit(20);
     posts = toPublicPosts(data ?? []);
+    const postIds = posts.map((post) => post.id);
+    if (postIds.length > 0) {
+      const { data: postLikes } = await supabase
+        .from("post_likes")
+        .select("post_id, user_id")
+        .in("post_id", postIds);
+      posts = applyPostLikeState(posts, postLikes ?? [], userId);
+    }
   }
 
   return (

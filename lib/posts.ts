@@ -30,6 +30,8 @@ export type PublicPost = {
   language: Language;
   created_at: string;
   comment_count: number;
+  likeCount: number;
+  likedByCurrentUser: boolean;
   author_id: string;
   author: {
     username: string;
@@ -66,6 +68,8 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       language: value.language,
       created_at: value.created_at,
       comment_count: commentCount,
+      likeCount: 0,
+      likedByCurrentUser: false,
       author: { username: author.username, display_name: typeof author.display_name === "string" ? author.display_name : null },
     }];
   });

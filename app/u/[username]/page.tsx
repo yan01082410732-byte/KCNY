@@ -4,6 +4,7 @@ import { normalizeLanguage } from "@/lib/auth";
 import { isSafeUsername, PUBLIC_PROFILE_FIELDS, type PublicProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { toPublicPosts } from "@/lib/posts";
+import { applyPostLikeState } from "@/lib/post-likes";
 
 export const dynamic = "force-dynamic";
 
@@ -36,5 +37,15 @@ export default async function PublicProfilePage({ params, searchParams }: { para
     .order("created_at", { ascending: false })
     .limit(20);
 
-  return <ProfilePageClient profile={profile as PublicProfile} posts={toPublicPosts(posts ?? [])} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;
+  let publicPosts = toPublicPosts(posts ?? []);
+  const postIds = publicPosts.map((post) => post.id);
+  if (postIds.length > 0) {
+    const { data: postLikes } = await supabase
+      .from("post_likes")
+      .select("post_id, user_id")
+      .in("post_id", postIds);
+    publicPosts = applyPostLikeState(publicPosts, postLikes ?? [], currentUserId);
+  }
+
+  return <ProfilePageClient profile={profile as PublicProfile} posts={publicPosts} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;
 }

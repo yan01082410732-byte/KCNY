@@ -3,6 +3,7 @@ import { PostDetailClient } from "@/components/PostDetailClient";
 import { toPublicComments } from "@/lib/comments";
 import { isSafePostId, toPublicPosts } from "@/lib/posts";
 import { normalizeLanguage } from "@/lib/auth";
+import { applyPostLikeState } from "@/lib/post-likes";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export default async function PostDetailPage({ params, searchParams }: { params:
   const supabase = await createClient();
   if (!supabase) notFound();
   const { data: post, error } = await supabase.from("posts").select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name)").eq("id", id).maybeSingle();
-  const publicPost = toPublicPosts(post ? [post] : [])[0];
+  let publicPost = toPublicPosts(post ? [post] : [])[0];
   if (error || !post || !publicPost) notFound();
 
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -26,6 +27,11 @@ export default async function PostDetailPage({ params, searchParams }: { params:
     currentUsername = profile?.username;
     currentDisplayName = profile?.display_name ?? undefined;
   }
+  const { data: postLikes } = await supabase
+    .from("post_likes")
+    .select("post_id, user_id")
+    .eq("post_id", id);
+  publicPost = applyPostLikeState([publicPost], postLikes ?? [], currentUserId)[0];
   const { data: comments, error: commentsError } = await supabase
     .from("comments")
     .select("id, post_id, author_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")
