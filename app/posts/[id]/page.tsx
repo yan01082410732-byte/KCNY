@@ -4,6 +4,7 @@ import { toPublicComments } from "@/lib/comments";
 import { isSafePostId, toPublicPosts } from "@/lib/posts";
 import { normalizeLanguage } from "@/lib/auth";
 import { applyPostLikeState } from "@/lib/post-likes";
+import { applyPostBookmarkState } from "@/lib/post-bookmarks";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,14 @@ export default async function PostDetailPage({ params, searchParams }: { params:
     .select("post_id, user_id")
     .eq("post_id", id);
   publicPost = applyPostLikeState([publicPost], postLikes ?? [], currentUserId)[0];
+  if (currentUserId) {
+    const { data: postBookmarks } = await supabase
+      .from("post_bookmarks")
+      .select("post_id")
+      .eq("user_id", currentUserId)
+      .eq("post_id", id);
+    publicPost = applyPostBookmarkState([publicPost], postBookmarks ?? [])[0];
+  }
   const { data: comments, error: commentsError } = await supabase
     .from("comments")
     .select("id, post_id, author_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")

@@ -5,6 +5,7 @@ import { isSafeUsername, PUBLIC_PROFILE_FIELDS, type PublicProfile } from "@/lib
 import { createClient } from "@/lib/supabase/server";
 import { toPublicPosts } from "@/lib/posts";
 import { applyPostLikeState } from "@/lib/post-likes";
+import { applyPostBookmarkState } from "@/lib/post-bookmarks";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,14 @@ export default async function PublicProfilePage({ params, searchParams }: { para
       .select("post_id, user_id")
       .in("post_id", postIds);
     publicPosts = applyPostLikeState(publicPosts, postLikes ?? [], currentUserId);
+    if (currentUserId) {
+      const { data: postBookmarks } = await supabase
+        .from("post_bookmarks")
+        .select("post_id")
+        .eq("user_id", currentUserId)
+        .in("post_id", postIds);
+      publicPosts = applyPostBookmarkState(publicPosts, postBookmarks ?? []);
+    }
   }
 
   return <ProfilePageClient profile={profile as PublicProfile} posts={publicPosts} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;

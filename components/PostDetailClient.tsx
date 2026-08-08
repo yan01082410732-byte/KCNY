@@ -5,6 +5,7 @@ import { createComment, deleteComment } from "@/app/posts/[id]/comment-actions";
 import { deletePost } from "@/app/posts/actions";
 import { Header } from "@/components/Header";
 import { LikeButton } from "@/components/LikeButton";
+import { BookmarkButton } from "@/components/BookmarkButton";
 import {
   commentAvatarInitial,
   commentCountLabel,
@@ -62,7 +63,7 @@ export function PostDetailClient({
           <p className="post-language">{postCategoryLabel(post.category, activeLanguage)} · {postLanguageLabel(post.language, activeLanguage)}</p>
           <h1>{post.title}</h1>
           <p className="post-detail-content">{post.content}</p>
-          <div className="post-detail-actions"><LikeButton postId={post.id} likeCount={post.likeCount} liked={post.likedByCurrentUser} language={activeLanguage} returnTo={`/posts/${encodeURIComponent(post.id)}?lang=${activeLanguage}`} authenticated={authenticated} /></div>
+          <div className="post-detail-actions"><LikeButton postId={post.id} likeCount={post.likeCount} liked={post.likedByCurrentUser} language={activeLanguage} returnTo={`/posts/${encodeURIComponent(post.id)}?lang=${activeLanguage}`} authenticated={authenticated} /><BookmarkButton postId={post.id} bookmarked={post.bookmarkedByCurrentUser} language={activeLanguage} returnTo={`/posts/${encodeURIComponent(post.id)}?lang=${activeLanguage}`} authenticated={authenticated} /></div>
           {(canEdit || canDelete) && <div className="post-owner-actions">
             {canEdit && <a className="button secondary" href={`/posts/${encodeURIComponent(post.id)}/edit?lang=${activeLanguage}`}>{korean ? "게시글 수정" : "编辑帖子"}</a>}
             {canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}

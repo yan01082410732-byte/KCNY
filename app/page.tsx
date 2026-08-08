@@ -2,6 +2,7 @@ import { HomePageClient } from "@/components/HomePageClient";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { applyPostLikeState } from "@/lib/post-likes";
+import { applyPostBookmarkState } from "@/lib/post-bookmarks";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,14 @@ export default async function HomePage({
         .select("post_id, user_id")
         .in("post_id", postIds);
       posts = applyPostLikeState(posts, postLikes ?? [], userId);
+      if (userId) {
+        const { data: postBookmarks } = await supabase
+          .from("post_bookmarks")
+          .select("post_id")
+          .eq("user_id", userId)
+          .in("post_id", postIds);
+        posts = applyPostBookmarkState(posts, postBookmarks ?? []);
+      }
     }
   }
 

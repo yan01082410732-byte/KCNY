@@ -17,8 +17,8 @@ export function userMenuProfileHref(username?: string, language?: UserMenuLangua
 
 export function userMenuLabels(language: UserMenuLanguage) {
   return language === "KR"
-    ? { profile: "내 프로필", profileUnavailable: "프로필을 사용할 수 없습니다", settings: "프로필 편집", createPost: "글 쓰기", signOut: "로그아웃", menu: "사용자 메뉴" }
-    : { profile: "我的主页", profileUnavailable: "个人主页暂不可用", settings: "编辑资料", createPost: "发布帖子", signOut: "退出登录", menu: "用户菜单" };
+    ? { profile: "내 프로필", profileUnavailable: "프로필을 사용할 수 없습니다", settings: "프로필 편집", bookmarks: "내 저장글", createPost: "글 쓰기", signOut: "로그아웃", menu: "사용자 메뉴" }
+    : { profile: "我的主页", profileUnavailable: "个人主页暂不可用", settings: "编辑资料", bookmarks: "我的收藏", createPost: "发布帖子", signOut: "退出登录", menu: "用户菜单" };
 }
 
 export function userMenuButtonState(open: boolean) {

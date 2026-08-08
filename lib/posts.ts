@@ -32,6 +32,7 @@ export type PublicPost = {
   comment_count: number;
   likeCount: number;
   likedByCurrentUser: boolean;
+  bookmarkedByCurrentUser: boolean;
   author_id: string;
   author: {
     username: string;
@@ -70,6 +71,7 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       comment_count: commentCount,
       likeCount: 0,
       likedByCurrentUser: false,
+      bookmarkedByCurrentUser: false,
       author: { username: author.username, display_name: typeof author.display_name === "string" ? author.display_name : null },
     }];
   });

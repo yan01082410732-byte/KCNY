@@ -64,3 +64,18 @@ header { height:76px; background:rgba(251,250,247,.93); border-bottom:1px solid 
 .like-signin-hint { margin:0; color:var(--muted); font-size:11px; line-height:1.35; }
 .post-detail-actions { display:flex; justify-content:flex-end; margin-top:20px; }
 @media (max-width:320px) { .post-actions { width:100%; justify-content:space-between; }.like-button { min-height:36px; } }
+
+.bookmark-control { display:grid; gap:5px; }
+.bookmark-button { display:inline-flex; align-items:center; gap:5px; min-height:34px; border:1px solid var(--line); border-radius:8px; padding:6px 9px; background:#fff; color:#64718a; font-size:12px; font-weight:700; }
+.bookmark-button:hover:not(:disabled) { border-color:#d6ad63; color:#967127; }
+.bookmark-button.bookmarked { border-color:#ead4a9; background:#fff8e8; color:#906b22; }
+.bookmark-button:disabled { cursor:wait; opacity:.7; }
+.bookmark-signin-hint { margin:0; color:var(--muted); font-size:11px; line-height:1.35; }
+.post-detail-actions { gap:10px; flex-wrap:wrap; }
+.bookmarks-page { min-height:calc(100vh - 76px); padding-top:50px; padding-bottom:72px; }
+.bookmarks-page h1 { margin:0; font-size:29px; letter-spacing:-1.4px; }
+.bookmarks-empty { margin-top:18px; border:1px solid var(--line); border-radius:16px; background:#fff; padding:48px 25px; color:var(--muted); text-align:center; }
+.bookmarks-empty h2 { margin:0 0 8px; color:var(--ink); font-size:20px; }
+.bookmarks-empty p { margin:0; }
+@media (max-width:700px) { .bookmarks-page { padding-top:28px; padding-bottom:45px; } }
+@media (max-width:320px) { .post-actions { justify-content:flex-start; }.post-detail-actions { justify-content:flex-start; }.like-button,.bookmark-button { min-height:36px; } }
