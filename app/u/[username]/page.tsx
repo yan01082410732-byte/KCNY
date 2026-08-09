@@ -31,6 +31,16 @@ export default async function PublicProfilePage({ params, searchParams }: { para
     currentDisplayName = currentProfile?.display_name ?? undefined;
   }
 
+  const [{ count: followerCount }, { count: followingCount }] = await Promise.all([
+    supabase.from("user_follows").select("*", { count: "exact", head: true }).eq("following_id", profile.id),
+    supabase.from("user_follows").select("*", { count: "exact", head: true }).eq("follower_id", profile.id),
+  ]);
+  let followingByCurrentUser = false;
+  if (currentUserId && currentUserId !== profile.id) {
+    const { data: relationship } = await supabase.from("user_follows").select("follower_id").eq("follower_id", currentUserId).eq("following_id", profile.id).maybeSingle();
+    followingByCurrentUser = Boolean(relationship);
+  }
+
   const { data: posts } = await supabase
     .from("posts")
     .select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name), comments(count)")
@@ -56,5 +66,5 @@ export default async function PublicProfilePage({ params, searchParams }: { para
     }
   }
 
-  return <ProfilePageClient profile={profile as PublicProfile} posts={publicPosts} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} />;
+  return <ProfilePageClient profile={profile as PublicProfile} posts={publicPosts} initialLanguage={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} followerCount={followerCount ?? 0} followingCount={followingCount ?? 0} followingByCurrentUser={followingByCurrentUser} />;
 }
