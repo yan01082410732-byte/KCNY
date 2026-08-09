@@ -72,6 +72,11 @@ export function commentAvatarInitial(author: CommentAuthor) {
   return Array.from(source)[0] || "K";
 }
 
+export function replyTargetUsername(parent: Pick<PublicComment, "author"> | undefined) {
+  const username = parent?.author.username.trim();
+  return username || undefined;
+}
+
 export function commentCountLabel(count: number, language: CommentLanguage) {
   return language === "KR" ? `댓글 ${count}` : `${count} 条评论`;
 }
