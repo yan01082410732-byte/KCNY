@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { PostDetailClient } from "@/components/PostDetailClient";
-import { toPublicComments } from "@/lib/comments";
+import { groupCommentThreads, toPublicComments } from "@/lib/comments";
 import { isSafePostId, toPublicPosts } from "@/lib/posts";
 import { normalizeLanguage } from "@/lib/auth";
 import { applyPostLikeState } from "@/lib/post-likes";
@@ -43,10 +43,11 @@ export default async function PostDetailPage({ params, searchParams }: { params:
   }
   const { data: comments, error: commentsError } = await supabase
     .from("comments")
-    .select("id, post_id, author_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")
+    .select("id, post_id, author_id, parent_comment_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")
     .eq("post_id", id)
     .order("created_at", { ascending: true })
-    .limit(100);
+    .limit(200);
 
-  return <PostDetailClient post={publicPost} comments={toPublicComments(comments ?? [], currentUserId)} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canEdit={post.author_id === currentUserId} canDelete={post.author_id === currentUserId} />;
+  const publicComments = toPublicComments(comments ?? [], currentUserId);
+  return <PostDetailClient post={publicPost} commentThreads={groupCommentThreads(publicComments)} commentCount={publicComments.length} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canEdit={post.author_id === currentUserId} canDelete={post.author_id === currentUserId} />;
 }
