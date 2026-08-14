@@ -1,5 +1,6 @@
 import { HomePageClient } from "@/components/HomePageClient";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
+import { normalizeFeedCategory, normalizeFeedMode, type FeedMode } from "@/lib/following-feed";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { applyPostLikeState } from "@/lib/post-likes";
 import { applyPostBookmarkState } from "@/lib/post-bookmarks";
@@ -7,62 +8,59 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+const publicPostSelect = "id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name), comments(count)";
+
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{ lang?: string }>;
 }) {
-  const { lang: rawLanguage } = await searchParams;
-  const initialLanguage = isLanguage(rawLanguage)
-    ? rawLanguage
-    : normalizeLanguage(rawLanguage);
+  const { lang: rawLanguage, feed: rawFeed, category: rawCategory } = await searchParams as { lang?: string; feed?: string; category?: string };
+  const initialLanguage = isLanguage(rawLanguage) ? rawLanguage : normalizeLanguage(rawLanguage);
+  const feed = normalizeFeedMode(rawFeed);
+  const category = normalizeFeedCategory(rawCategory);
   let authenticated = false;
   let username: string | undefined;
   let displayName: string | undefined;
+  let userId: string | undefined;
+  let followingIds: string[] = [];
   let posts: PublicPost[] = [];
   const supabase = await createClient();
 
   if (supabase) {
     const { data: claimsData } = await supabase.auth.getClaims();
-    const userId = claimsData?.claims?.sub;
-    if (userId) {
+    const claimSubject = claimsData?.claims?.sub;
+    if (typeof claimSubject === "string") {
+      userId = claimSubject;
       authenticated = true;
       const { data: profile } = await supabase.from("profiles").select("username, display_name").eq("id", userId).maybeSingle();
       username = profile?.username;
       displayName = profile?.display_name ?? undefined;
     }
 
-    const { data } = await supabase
-      .from("posts")
-      .select("id, author_id, title, content, category, language, created_at, author:profiles!posts_author_id_fkey(username, display_name), comments(count)")
-      .order("created_at", { ascending: false })
-      .limit(20);
-    posts = toPublicPosts(data ?? []);
+    if (feed === "following" && userId) {
+      const { data: follows } = await supabase.from("user_follows").select("following_id").eq("follower_id", userId);
+      followingIds = (follows ?? []).flatMap((row) => typeof row.following_id === "string" ? [row.following_id] : []);
+    }
+
+    if (feed === "all" || (userId && followingIds.length > 0)) {
+      let query = supabase.from("posts").select(publicPostSelect).order("created_at", { ascending: false }).limit(20);
+      if (feed === "following") query = query.in("author_id", followingIds);
+      if (category) query = query.eq("category", category);
+      const { data } = await query;
+      posts = toPublicPosts(data ?? []);
+    }
+
     const postIds = posts.map((post) => post.id);
     if (postIds.length > 0) {
-      const { data: postLikes } = await supabase
-        .from("post_likes")
-        .select("post_id, user_id")
-        .in("post_id", postIds);
+      const { data: postLikes } = await supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds);
       posts = applyPostLikeState(posts, postLikes ?? [], userId);
       if (userId) {
-        const { data: postBookmarks } = await supabase
-          .from("post_bookmarks")
-          .select("post_id")
-          .eq("user_id", userId)
-          .in("post_id", postIds);
+        const { data: postBookmarks } = await supabase.from("post_bookmarks").select("post_id").eq("user_id", userId).in("post_id", postIds);
         posts = applyPostBookmarkState(posts, postBookmarks ?? []);
       }
     }
   }
 
-  return (
-    <HomePageClient
-      authenticated={authenticated}
-      username={username}
-      displayName={displayName}
-      posts={posts}
-      initialLanguage={initialLanguage}
-    />
-  );
+  return <HomePageClient authenticated={authenticated} username={username} displayName={displayName} posts={posts} initialLanguage={initialLanguage} initialFeed={feed as FeedMode} initialCategory={category} />;
 }
