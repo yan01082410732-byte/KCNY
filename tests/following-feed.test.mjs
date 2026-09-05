@@ -5,6 +5,9 @@ import test from "node:test";
 const helpers = readFileSync(new URL("../lib/following-feed.ts", import.meta.url), "utf8");
 const homePage = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
 const homeClient = readFileSync(new URL("../components/HomePageClient.tsx", import.meta.url), "utf8");
+const header = readFileSync(new URL("../components/Header.tsx", import.meta.url), "utf8");
+const rootLayout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
+const sessionProxy = readFileSync(new URL("../lib/supabase/proxy.ts", import.meta.url), "utf8");
 
 test("following feed accepts only all and following modes", () => {
   assert.match(helpers, /value === "following" \? "following" : "all"/);
@@ -19,6 +22,25 @@ test("following feed validates categories through the shared post category guard
 test("following feed URLs preserve language feed and category", () => {
   assert.match(helpers, /new URLSearchParams\(\{ lang: language, feed \}\)/);
   assert.match(helpers, /params\.set\("category", category\)/);
+});
+
+test("home language links preserve feed and category instead of client-only state", () => {
+  assert.match(homeClient, /languageHref=\{\(nextLanguage\) => hrefFor\(nextLanguage\)\}/);
+  assert.doesNotMatch(homeClient, /setLanguage\(/);
+  assert.match(header, /languageHref\?: \(language: "CN" \| "KR"\) => string/);
+  assert.match(header, /href=\{languageHref\("KR"\)\}/);
+});
+
+test("invalid explicit feed is redirected to the canonical all URL", () => {
+  assert.match(homePage, /rawFeed !== undefined && rawFeed !== feed/);
+  assert.match(homePage, /redirect\(followingFeedHref\(initialLanguage, feed, category\)\)/);
+});
+
+test("root html language comes from the URL-derived request header", () => {
+  assert.match(sessionProxy, /x-kcny-language/);
+  assert.match(sessionProxy, /searchParams\.get\("lang"\) === "KR" \? "KR" : "CN"/);
+  assert.match(rootLayout, /headers\(\)/);
+  assert.match(rootLayout, /htmlLanguage\(language\)/);
 });
 
 test("following feed copy is bilingual", () => {

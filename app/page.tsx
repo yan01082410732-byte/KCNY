@@ -1,6 +1,7 @@
 import { HomePageClient } from "@/components/HomePageClient";
+import { redirect } from "next/navigation";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
-import { normalizeFeedCategory, normalizeFeedMode, type FeedMode } from "@/lib/following-feed";
+import { followingFeedHref, normalizeFeedCategory, normalizeFeedMode, type FeedMode } from "@/lib/following-feed";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { applyPostLikeState } from "@/lib/post-likes";
 import { applyPostBookmarkState } from "@/lib/post-bookmarks";
@@ -19,6 +20,9 @@ export default async function HomePage({
   const initialLanguage = isLanguage(rawLanguage) ? rawLanguage : normalizeLanguage(rawLanguage);
   const feed = normalizeFeedMode(rawFeed);
   const category = normalizeFeedCategory(rawCategory);
+  if (rawFeed !== undefined && rawFeed !== feed) {
+    redirect(followingFeedHref(initialLanguage, feed, category));
+  }
   let authenticated = false;
   let username: string | undefined;
   let displayName: string | undefined;
