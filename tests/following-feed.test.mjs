@@ -8,6 +8,7 @@ const homeClient = readFileSync(new URL("../components/HomePageClient.tsx", impo
 const header = readFileSync(new URL("../components/Header.tsx", import.meta.url), "utf8");
 const rootLayout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
 const sessionProxy = readFileSync(new URL("../lib/supabase/proxy.ts", import.meta.url), "utf8");
+const middleware = readFileSync(new URL("../middleware.ts", import.meta.url), "utf8");
 
 test("following feed accepts only all and following modes", () => {
   assert.match(helpers, /value === "following" \? "following" : "all"/);
@@ -41,6 +42,7 @@ test("root html language comes from the URL-derived request header", () => {
   assert.match(sessionProxy, /searchParams\.get\("lang"\) === "KR" \? "KR" : "CN"/);
   assert.match(rootLayout, /headers\(\)/);
   assert.match(rootLayout, /htmlLanguage\(language\)/);
+  assert.match(middleware, /proxy as middleware/);
 });
 
 test("following feed copy is bilingual", () => {
