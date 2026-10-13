@@ -3,6 +3,10 @@ import type { Language } from "@/lib/auth";
 export const SEARCH_TYPES = ["posts", "users"] as const;
 export type SearchType = (typeof SEARCH_TYPES)[number];
 
+export function searchHref(language: Language, type: SearchType, query: string) {
+  return `/search?${new URLSearchParams({ lang: language, type, q: query }).toString()}`;
+}
+
 export type PublicSearchProfile = {
   username: string;
   display_name: string | null;

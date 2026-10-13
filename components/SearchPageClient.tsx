@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { PostCard } from "@/components/PostCard";
 import type { Language } from "@/lib/auth";
-import { searchLabels, type PublicSearchProfile, type SearchType } from "@/lib/search";
+import { searchHref as buildSearchHref, searchLabels, type PublicSearchProfile, type SearchType } from "@/lib/search";
 import type { PublicPost } from "@/lib/posts";
 
 export function SearchPageClient({
@@ -26,14 +26,16 @@ export function SearchPageClient({
   username?: string;
   displayName?: string;
 }) {
-  const [language, setLanguage] = useState(initialLanguage);
+  const router = useRouter();
+  const language = initialLanguage;
+  const languageHref = (nextLanguage: Language) => buildSearchHref(nextLanguage, type, query);
   const text = searchLabels(language);
   const activeResults = type === "posts" ? posts : users;
   const searchHref = (nextType: SearchType) => `/search?lang=${language}&type=${nextType}&q=${encodeURIComponent(query)}`;
   const returnTo = `/search?lang=${language}&type=posts&q=${encodeURIComponent(query)}`;
 
   return <main>
-    <Header language={language} onLanguageChange={setLanguage} authenticated={authenticated} username={username} displayName={displayName} />
+    <Header language={language} onLanguageChange={(nextLanguage) => router.push(languageHref(nextLanguage))} languageHref={languageHref} authenticated={authenticated} username={username} displayName={displayName} />
     <section className="shell search-page">
       <p className="eyebrow"><span /> {text.eyebrow}</p>
       <h1>{text.title}</h1>
