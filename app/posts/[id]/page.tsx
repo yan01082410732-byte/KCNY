@@ -6,12 +6,14 @@ import { normalizeLanguage } from "@/lib/auth";
 import { applyPostLikeState } from "@/lib/post-likes";
 import { applyPostBookmarkState } from "@/lib/post-bookmarks";
 import { createClient } from "@/lib/supabase/server";
+import { COMMENT_PAGE_SIZE, commentCursorFilter, parseCommentCursor, sliceCommentPage, pageWithParentContext } from "@/lib/comment-pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function PostDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lang?: string }> }) {
+export default async function PostDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ lang?: string; commentsAfter?: string }> }) {
   const { id } = await params;
-  const { lang } = await searchParams;
+  const { lang, commentsAfter } = await searchParams;
+  const cursor = parseCommentCursor(commentsAfter);
   if (!isSafePostId(id)) notFound();
   const supabase = await createClient();
   if (!supabase) notFound();
@@ -41,13 +43,31 @@ export default async function PostDetailPage({ params, searchParams }: { params:
       .eq("post_id", id);
     publicPost = applyPostBookmarkState([publicPost], postBookmarks ?? [])[0];
   }
-  const { data: comments, error: commentsError } = await supabase
+  const commentSelect = "id, post_id, author_id, parent_comment_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)";
+  let commentQuery = supabase
     .from("comments")
-    .select("id, post_id, author_id, parent_comment_id, content, created_at, author:profiles!comments_author_id_fkey(username, display_name)")
+    .select(commentSelect)
     .eq("post_id", id)
     .order("created_at", { ascending: true })
-    .limit(200);
+    .order("id", { ascending: true })
+    .limit(COMMENT_PAGE_SIZE + 1);
+  if (cursor) commentQuery = commentQuery.or(commentCursorFilter(cursor));
+  const [{ data: comments, error: commentsError }, { count, error: countError }] = await Promise.all([
+    commentQuery,
+    supabase.from("comments").select("id", { count: "exact", head: true }).eq("post_id", id),
+  ]);
 
   const publicComments = toPublicComments(comments ?? [], currentUserId);
-  return <PostDetailClient post={publicPost} commentThreads={groupCommentThreads(publicComments)} commentCount={publicComments.length} commentsUnavailable={Boolean(commentsError)} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canEdit={post.author_id === currentUserId} canDelete={post.author_id === currentUserId} />;
+  const page = sliceCommentPage(publicComments);
+  const loadedIds = new Set(page.items.map((comment) => comment.id));
+  const parentIds = [...new Set(page.items.flatMap((comment) => comment.parentCommentId && !loadedIds.has(comment.parentCommentId) ? [comment.parentCommentId] : []))];
+  let parentComments = [] as typeof publicComments;
+  let parentsUnavailable = false;
+  if (parentIds.length) {
+    const { data: parents, error } = await supabase.from("comments").select(commentSelect).eq("post_id", id).is("parent_comment_id", null).in("id", parentIds);
+    parentComments = toPublicComments(parents ?? [], currentUserId);
+    parentsUnavailable = Boolean(error);
+  }
+  const threads = groupCommentThreads(pageWithParentContext(page.items, parentComments));
+  return <PostDetailClient post={publicPost} commentThreads={threads} commentCount={count ?? 0} commentsUnavailable={Boolean(commentsError || countError || parentsUnavailable)} nextCommentCursor={page.nextCursor} currentCommentCursor={cursor ? commentsAfter : undefined} language={normalizeLanguage(lang)} authenticated={Boolean(currentUserId)} currentUsername={currentUsername} currentDisplayName={currentDisplayName} canEdit={post.author_id === currentUserId} canDelete={post.author_id === currentUserId} />;
 }

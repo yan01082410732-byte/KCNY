@@ -123,7 +123,7 @@ export function groupCommentThreads(comments: PublicComment[]): CommentThread[] 
   for (const comment of comments) {
     if (comment.parentCommentId !== null) byId.get(comment.parentCommentId)?.replies.push(comment);
   }
-  const byCreatedAt = (a: PublicComment, b: PublicComment) => a.createdAt.localeCompare(b.createdAt);
+  const byCreatedAt = (a: PublicComment, b: PublicComment) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id);
   topLevel.sort((a, b) => byCreatedAt(a.comment, b.comment));
   for (const thread of topLevel) thread.replies.sort(byCreatedAt);
   return topLevel;
