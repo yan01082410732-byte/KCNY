@@ -2,6 +2,11 @@ import type { Language } from "./auth";
 
 const messages: Record<Language, Record<string, string>> = {
   CN: {
+    invalid_credentials: "邮箱或密码不正确。",
+    service_unavailable: "登录服务暂时不可用，请稍后再试。",
+    rate_limit: "尝试次数过多，请稍后再试。",
+    auth_unknown: "暂时无法登录，请稍后再试。",
+    logout_failed: "暂时无法确认退出成功，请重试退出登录。",
     configuration: "认证服务暂时不可用，请稍后再试。",
     invalid_username: "用户名格式不正确。",
     invalid_display_name: "显示名称格式不正确。",
@@ -18,6 +23,11 @@ const messages: Record<Language, Record<string, string>> = {
     unknown: "发生了安全错误，请稍后再试。",
   },
   KR: {
+    invalid_credentials: "이메일 또는 비밀번호가 올바르지 않습니다.",
+    service_unavailable: "로그인 서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    rate_limit: "시도 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+    auth_unknown: "로그인할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    logout_failed: "로그아웃 완료를 확인할 수 없습니다. 다시 시도해 주세요.",
     configuration: "인증 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
     invalid_username: "사용자 이름 형식이 올바르지 않습니다.",
     invalid_display_name: "표시 이름 형식이 올바르지 않습니다.",

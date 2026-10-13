@@ -10,6 +10,7 @@ import {
   validateSignUp,
 } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { classifyAuthError, logServiceFailure, type AuthFailure } from "@/lib/service-errors";
 
 function authCallbackUrl(language: "CN" | "KR") {
   return `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?lang=${language}`;
@@ -88,14 +89,21 @@ export async function signIn(formData: FormData) {
     redirect(`/auth/login?lang=${language}&error=configuration`);
   }
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: input.email,
-    password: input.password,
-  });
-
-  if (signInError) {
-    redirect(`/auth/login?lang=${language}&error=auth_failed`);
+  let failure: AuthFailure | undefined;
+  try {
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    });
+    if (signInError) {
+      failure = classifyAuthError(signInError);
+      logServiceFailure("sign-in", signInError);
+    }
+  } catch (error) {
+    failure = classifyAuthError(error);
+    logServiceFailure("sign-in", error);
   }
+  if (failure) redirect(`/auth/login?lang=${language}&error=${failure}`);
 
   redirect(input.returnTo);
 }

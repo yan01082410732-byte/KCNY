@@ -6,6 +6,7 @@ import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { applyPostLikeState } from "@/lib/post-likes";
 import { applyPostBookmarkState } from "@/lib/post-bookmarks";
 import { createClient } from "@/lib/supabase/server";
+import { contentLoadState, logServiceFailure } from "@/lib/service-errors";
 
 export const dynamic = "force-dynamic";
 
@@ -29,10 +30,15 @@ export default async function HomePage({
   let userId: string | undefined;
   let followingIds: string[] = [];
   let posts: PublicPost[] = [];
+  let contentUnavailable = false;
+  try {
   const supabase = await createClient();
-
   if (supabase) {
-    const { data: claimsData } = await supabase.auth.getClaims();
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+    if (claimsError && feed === "following" && claimsError.name !== "AuthSessionMissingError") {
+      contentUnavailable = true;
+      logServiceFailure("feed-auth", claimsError);
+    }
     const claimSubject = claimsData?.claims?.sub;
     if (typeof claimSubject === "string") {
       userId = claimSubject;
@@ -43,7 +49,8 @@ export default async function HomePage({
     }
 
     if (feed === "following" && userId) {
-      const { data: follows } = await supabase.from("user_follows").select("following_id").eq("follower_id", userId);
+      const { data: follows, error } = await supabase.from("user_follows").select("following_id").eq("follower_id", userId);
+      if (error) { contentUnavailable = true; logServiceFailure("feed-follows", error); }
       followingIds = (follows ?? []).flatMap((row) => typeof row.following_id === "string" ? [row.following_id] : []);
     }
 
@@ -51,20 +58,27 @@ export default async function HomePage({
       let query = supabase.from("posts").select(publicPostSelect).order("created_at", { ascending: false }).limit(20);
       if (feed === "following") query = query.in("author_id", followingIds);
       if (category) query = query.eq("category", category);
-      const { data } = await query;
+      const { data, error } = await query;
+      if (contentLoadState(error, data?.length ?? 0) === "unavailable") { contentUnavailable = true; logServiceFailure("feed-posts", error); }
       posts = toPublicPosts(data ?? []);
     }
 
     const postIds = posts.map((post) => post.id);
     if (postIds.length > 0) {
-      const { data: postLikes } = await supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds);
+      const { data: postLikes, error: likesError } = await supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds);
+      if (likesError) { contentUnavailable = true; logServiceFailure("feed-likes", likesError); }
       posts = applyPostLikeState(posts, postLikes ?? [], userId);
       if (userId) {
-        const { data: postBookmarks } = await supabase.from("post_bookmarks").select("post_id").eq("user_id", userId).in("post_id", postIds);
+        const { data: postBookmarks, error: bookmarksError } = await supabase.from("post_bookmarks").select("post_id").eq("user_id", userId).in("post_id", postIds);
+        if (bookmarksError) { contentUnavailable = true; logServiceFailure("feed-bookmarks", bookmarksError); }
         posts = applyPostBookmarkState(posts, postBookmarks ?? []);
       }
     }
+  } else { contentUnavailable = true; }
+  } catch (error) {
+    contentUnavailable = true;
+    logServiceFailure("feed-load", error);
   }
 
-  return <HomePageClient authenticated={authenticated} username={username} displayName={displayName} posts={posts} initialLanguage={initialLanguage} initialFeed={feed as FeedMode} initialCategory={category} />;
+  return <HomePageClient authenticated={authenticated} username={username} displayName={displayName} posts={posts} initialLanguage={initialLanguage} initialFeed={feed as FeedMode} initialCategory={category} contentUnavailable={contentUnavailable} />;
 }
