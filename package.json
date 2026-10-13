@@ -12,9 +12,21 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.57.4",
-    "next": "^15.5.2",
+    "next": "15.5.27",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
+  },
+  "overrides": {
+    "next": { "postcss": { ".": "8.5.23", "nanoid": "3.3.18", "source-map-js": "1.2.2" }, "sharp": "0.35.5" },
+    "postcss": { "nanoid": "3.3.18", "source-map-js": "1.2.2" }
+  },
+  "pnpm": {
+    "overrides": {
+      "next>postcss": "8.5.23",
+      "next>sharp": "0.35.5",
+      "postcss>nanoid": "3.3.18",
+      "postcss>source-map-js": "1.2.2"
+    }
   },
   "devDependencies": {
     "@types/node": "^24.3.0",
