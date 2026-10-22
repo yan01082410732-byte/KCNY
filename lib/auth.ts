@@ -24,6 +24,16 @@ export function normalizeLanguage(value: unknown): Language {
   return value === "KR" ? "KR" : "CN";
 }
 
+export const LANGUAGE_COOKIE = "kcny-language";
+
+export function resolveLanguagePreference(query: unknown, stored: unknown): Language {
+  return isLanguage(query) ? query : isLanguage(stored) ? stored : "CN";
+}
+
+export function shouldApplyLanguagePreference(method: string, pathname: string, accept: string) {
+  return method === "GET" && accept.includes("text/html") && !pathname.startsWith("/auth/callback") && !pathname.startsWith("/api/");
+}
+
 export function htmlLanguage(value: Language) {
   return value === "KR" ? "ko-KR" : "zh-CN";
 }
@@ -54,6 +64,35 @@ export function safeReturnTo(value: unknown) {
     !decoded.includes("\\")
     ? value
     : "/";
+}
+
+export function safeAuthReturnTo(value: unknown) {
+  const destination = safeReturnTo(value);
+  let pathname = new URL(destination, "https://kcny.invalid").pathname;
+  for (let index = 0; index < 2; index += 1) {
+    try {
+      pathname = decodeURIComponent(pathname);
+    } catch {
+      return "/";
+    }
+  }
+  return pathname === "/auth" || pathname.startsWith("/auth/")
+    ? "/"
+    : destination;
+}
+
+export function authPageHref(page: "login" | "signup", language: Language, returnTo: unknown, status?: { kind: "error" | "notice"; value: string }) {
+  const query = new URLSearchParams({ lang: language });
+  const destination = safeAuthReturnTo(returnTo);
+  if (destination !== "/") query.set("returnTo", destination);
+  if (status) query.set(status.kind, status.value);
+  return `/auth/${page}?${query.toString()}`;
+}
+
+export function destinationWithLanguage(returnTo: unknown, language: Language) {
+  const destination = new URL(safeAuthReturnTo(returnTo), "https://kcny.invalid");
+  if (!destination.searchParams.has("lang")) destination.searchParams.set("lang", language);
+  return `${destination.pathname}${destination.search}${destination.hash}`;
 }
 
 const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

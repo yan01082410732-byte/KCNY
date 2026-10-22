@@ -14,7 +14,7 @@ function withActionError(returnTo: string, error: string) {
   return `${returnTo}${returnTo.includes("?") ? "&" : "?"}error=${error}`;
 }
 
-async function getLikeContext(formData: FormData) {
+async function getLikeContext(formData: FormData, actionError: "like_failed" | "unlike_failed") {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
   const postId = formData.get("postId");
@@ -31,12 +31,13 @@ async function getLikeContext(formData: FormData) {
   const userId = user?.id;
   if (!userId) redirectToLogin(language, returnTo);
 
-  const { data: post } = await supabase
+  const { data: post, error: postError } = await supabase
     .from("posts")
     .select("id, author:profiles!posts_author_id_fkey(username)")
     .eq("id", postId)
     .maybeSingle();
-  if (!post) redirect("/");
+  if (postError) redirect(withActionError(returnTo, actionError));
+  if (!post) redirect(withActionError(returnTo, actionError));
 
   const author = Array.isArray(post.author) ? post.author[0] : post.author;
   const username = author && typeof author.username === "string" ? author.username : undefined;
@@ -51,7 +52,7 @@ function revalidateLikePaths(postId: string, username?: string) {
 }
 
 export async function likePostAction(formData: FormData) {
-  const context = await getLikeContext(formData);
+  const context = await getLikeContext(formData, "like_failed");
   const { error } = await context.supabase.from("post_likes").upsert(
     { post_id: context.postId, user_id: context.userId },
     { onConflict: "post_id,user_id", ignoreDuplicates: true },
@@ -63,7 +64,7 @@ export async function likePostAction(formData: FormData) {
 }
 
 export async function unlikePostAction(formData: FormData) {
-  const context = await getLikeContext(formData);
+  const context = await getLikeContext(formData, "unlike_failed");
   const { error } = await context.supabase
     .from("post_likes")
     .delete()

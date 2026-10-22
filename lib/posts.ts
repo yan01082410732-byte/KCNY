@@ -60,6 +60,10 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
     const commentCount = commentRelation && typeof (commentRelation as Record<string, unknown>).count === "number"
       ? (commentRelation as Record<string, number>).count
       : 0;
+    const likeRelation = Array.isArray(value.post_likes) ? value.post_likes[0] : value.post_likes;
+    const likeCount = likeRelation && typeof (likeRelation as Record<string, unknown>).count === "number"
+      ? (likeRelation as Record<string, number>).count
+      : 0;
     return [{
       id: value.id,
       author_id: value.author_id,
@@ -69,7 +73,7 @@ export function toPublicPosts(rows: unknown[]): PublicPost[] {
       language: value.language,
       created_at: value.created_at,
       comment_count: commentCount,
-      likeCount: 0,
+      likeCount,
       likedByCurrentUser: false,
       bookmarkedByCurrentUser: false,
       author: { username: author.username, display_name: typeof author.display_name === "string" ? author.display_name : null },

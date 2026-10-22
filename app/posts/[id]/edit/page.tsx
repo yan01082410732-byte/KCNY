@@ -11,10 +11,10 @@ export default async function EditPostPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; error?: string }>;
 }) {
   const { id } = await params;
-  const { lang } = await searchParams;
+  const { lang, error: editError } = await searchParams;
   const language = normalizeLanguage(lang);
   if (!isSafePostId(id)) notFound();
 
@@ -44,5 +44,5 @@ export default async function EditPostPage({
     notFound();
   }
 
-  return <PostEditor post={post} language={isLanguage(lang) ? lang : post.language} />;
+  return <PostEditor post={post} language={isLanguage(lang) ? lang : post.language} viewerId={userId} error={editError} />;
 }

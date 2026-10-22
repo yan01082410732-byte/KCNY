@@ -36,6 +36,21 @@ export function applyPostLikeState(
   }));
 }
 
+export function applyViewerLikeState(posts: PublicPost[], rows: unknown[]) {
+  const likedIds = new Set(rows.flatMap((row) => {
+    const id = (row as { post_id?: unknown })?.post_id;
+    return typeof id === "string" ? [id] : [];
+  }));
+  return posts.map((post) => ({ ...post, likedByCurrentUser: likedIds.has(post.id) }));
+}
+
+export function postLikeErrorMessage(error: unknown, language: Language) {
+  if (error !== "like_failed" && error !== "unlike_failed") return undefined;
+  return language === "KR"
+    ? error === "like_failed" ? "좋아요 결과를 확인할 수 없습니다. 상태를 새로고침한 뒤 다시 시도해 주세요." : "좋아요 취소 결과를 확인할 수 없습니다. 상태를 새로고침한 뒤 다시 시도해 주세요."
+    : error === "like_failed" ? "无法确认点赞结果，请刷新状态后重试。" : "无法确认取消点赞的结果，请刷新状态后重试。";
+}
+
 export function postLikeLabels(language: Language) {
   return language === "KR"
     ? {
@@ -43,11 +58,13 @@ export function postLikeLabels(language: Language) {
         unlike: "좋아요 취소",
         signIn: "로그인 후 좋아요를 누를 수 있습니다.",
         pending: "처리 중…",
+        unavailable: "좋아요 상태를 불러오지 못했습니다. 새로고침해 주세요.",
       }
     : {
         like: "点赞",
         unlike: "取消点赞",
         signIn: "登录后即可点赞。",
         pending: "处理中…",
+        unavailable: "无法获取点赞状态，请刷新重试。",
       };
 }

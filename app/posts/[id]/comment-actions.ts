@@ -22,6 +22,8 @@ function revalidateCommentViews(postId: string) {
   revalidatePath("/u/[username]", "page");
 }
 
+export type CommentSubmitState = { status: "idle" | "success" | "error"; reason?: string };
+
 async function currentUserId() {
   const supabase = await createClient();
   if (!supabase) return { supabase: null, userId: undefined };
@@ -29,49 +31,55 @@ async function currentUserId() {
   return { supabase, userId: claimsData?.claims?.sub };
 }
 
-export async function createComment(formData: FormData) {
+export async function createComment(_previous: CommentSubmitState, formData: FormData): Promise<CommentSubmitState> {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
   const validation = validateCommentInput({ postId: formData.get("postId"), content: formData.get("content"), language: rawLanguage });
   const rawPostId = formData.get("postId");
-  if (!isLanguage(rawLanguage) || validation.error || !isSafePostId(rawPostId)) redirect(isSafePostId(rawPostId) ? postUrl(rawPostId, language, validation.error ?? "invalid_language") : "/");
-
-  const { supabase, userId } = await currentUserId();
-  if (!supabase) redirect(postUrl(validation.value.postId, language, "configuration"));
-  if (!userId) redirect(loginUrl(validation.value.postId, language));
-  const { data: post } = await supabase.from("posts").select("id").eq("id", validation.value.postId).maybeSingle();
-  if (!post) redirect(postUrl(validation.value.postId, language, "comment_failed"));
-  const { error } = await supabase.from("comments").insert({ post_id: validation.value.postId, author_id: userId, content: validation.value.content });
-  if (error) redirect(postUrl(validation.value.postId, language, "comment_failed"));
-  revalidateCommentViews(validation.value.postId);
-  redirect(postUrl(validation.value.postId, language));
+  if (!isLanguage(rawLanguage) || validation.error || !isSafePostId(rawPostId)) return { status: "error", reason: validation.error ?? "invalid_language" };
+  try {
+    const { supabase, userId } = await currentUserId();
+    if (!supabase) return { status: "error", reason: "configuration" };
+    if (!userId) return { status: "error", reason: "auth_required" };
+    const { data: post, error: postError } = await supabase.from("posts").select("id").eq("id", validation.value.postId).maybeSingle();
+    if (postError || !post) return { status: "error", reason: "invalid_post" };
+    const { error } = await supabase.from("comments").insert({ post_id: validation.value.postId, author_id: userId, content: validation.value.content });
+    if (error) return { status: "error", reason: error.code === "42501" ? "permission" : "comment_failed" };
+    try { revalidateCommentViews(validation.value.postId); } catch { /* The confirmed insert still succeeded; client refreshes. */ }
+    return { status: "success" };
+  } catch {
+    return { status: "error", reason: "network_failed" };
+  }
 }
 
-export async function createCommentReply(formData: FormData) {
+export async function createCommentReply(_previous: CommentSubmitState, formData: FormData): Promise<CommentSubmitState> {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
   const validation = validateCommentReplyInput({ postId: formData.get("postId"), parentCommentId: formData.get("parentCommentId"), content: formData.get("content"), language: rawLanguage });
   const rawPostId = formData.get("postId");
-  if (!isLanguage(rawLanguage) || validation.error || !isSafePostId(rawPostId)) redirect(isSafePostId(rawPostId) ? postUrl(rawPostId, language, validation.error ?? "invalid_language") : "/");
-
-  const { supabase, userId } = await currentUserId();
-  if (!supabase) redirect(postUrl(validation.value.postId, language, "configuration"));
-  if (!userId) redirect(loginUrl(validation.value.postId, language));
-  const { data: parent, error: parentError } = await supabase
-    .from("comments")
-    .select("id, post_id, parent_comment_id")
-    .eq("id", validation.value.parentCommentId)
-    .maybeSingle();
-  if (parentError || !parent || parent.post_id !== validation.value.postId || parent.parent_comment_id !== null) redirect(postUrl(validation.value.postId, language, "reply_failed"));
-  const { error } = await supabase.from("comments").insert({
-    post_id: validation.value.postId,
-    author_id: userId,
-    parent_comment_id: parent.id,
-    content: validation.value.content,
-  });
-  if (error) redirect(postUrl(validation.value.postId, language, "reply_failed"));
-  revalidateCommentViews(validation.value.postId);
-  redirect(postUrl(validation.value.postId, language));
+  if (!isLanguage(rawLanguage) || validation.error || !isSafePostId(rawPostId)) return { status: "error", reason: validation.error ?? "invalid_language" };
+  try {
+    const { supabase, userId } = await currentUserId();
+    if (!supabase) return { status: "error", reason: "configuration" };
+    if (!userId) return { status: "error", reason: "auth_required" };
+    const { data: parent, error: parentError } = await supabase
+      .from("comments")
+      .select("id, post_id, parent_comment_id")
+      .eq("id", validation.value.parentCommentId)
+      .maybeSingle();
+    if (parentError || !parent || parent.post_id !== validation.value.postId || parent.parent_comment_id !== null) return { status: "error", reason: "reply_failed" };
+    const { error } = await supabase.from("comments").insert({
+      post_id: validation.value.postId,
+      author_id: userId,
+      parent_comment_id: parent.id,
+      content: validation.value.content,
+    });
+    if (error) return { status: "error", reason: error.code === "42501" ? "permission" : "reply_failed" };
+    try { revalidateCommentViews(validation.value.postId); } catch { /* The confirmed insert still succeeded; client refreshes. */ }
+    return { status: "success" };
+  } catch {
+    return { status: "error", reason: "network_failed" };
+  }
 }
 
 export async function deleteComment(formData: FormData) {

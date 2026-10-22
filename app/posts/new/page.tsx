@@ -5,8 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function NewPostPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
-  const { lang } = await searchParams;
+export default async function NewPostPage({ searchParams }: { searchParams: Promise<{ lang?: string; error?: string }> }) {
+  const { lang, error } = await searchParams;
   const fallbackLanguage = normalizeLanguage(lang);
   const supabase = await createClient();
   if (!supabase) redirect(`/auth/login?lang=${fallbackLanguage}&returnTo=/posts/new`);
@@ -15,5 +15,5 @@ export default async function NewPostPage({ searchParams }: { searchParams: Prom
   if (!userId) redirect(`/auth/login?lang=${fallbackLanguage}&returnTo=/posts/new`);
   const { data: profile } = await supabase.from("profiles").select("preferred_language").eq("id", userId).maybeSingle();
   const language = isLanguage(lang) ? lang : (isLanguage(profile?.preferred_language) ? profile.preferred_language : "CN");
-  return <PostComposer language={language} />;
+  return <PostComposer language={language} viewerId={userId} error={error} />;
 }

@@ -11,6 +11,12 @@ export type PublicProfile = {
   created_at: string;
 };
 
+export function profilePostsHref(username: string, language: ProfileLanguage, before?: string) {
+  const query = new URLSearchParams({ lang: language });
+  if (before) query.set("before", before);
+  return `/u/${encodeURIComponent(username)}?${query.toString()}#posts`;
+}
+
 export function isSafeUsername(value: unknown): value is string {
   return (
     typeof value === "string" &&

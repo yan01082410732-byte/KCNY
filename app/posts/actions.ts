@@ -20,7 +20,7 @@ export async function createPost(formData: FormData) {
 
   const { data, error } = await supabase.from("posts").insert({ author_id: userId, title: result.title, content: result.content, category: result.category, language: result.language }).select("id").single();
   if (error || !isSafePostId(data?.id)) redirect(`/posts/new?lang=${language}&error=publish_failed`);
-  redirect(`/posts/${data.id}?lang=${language}`);
+  redirect(`/posts/${data.id}?lang=${language}&published=1`);
 }
 
 export async function deletePost(formData: FormData) {
@@ -35,9 +35,9 @@ export async function deletePost(formData: FormData) {
   const userId = claimsData?.claims?.sub;
   if (!userId) redirect(`/auth/login?lang=${language}&returnTo=/posts/${postId}`);
   const { data: profile } = await supabase.from("profiles").select("username").eq("id", userId).maybeSingle();
-  const { error } = await supabase.from("posts").delete().eq("id", postId).eq("author_id", userId);
-  if (error) redirect(`/posts/${postId}?lang=${language}&error=delete_failed`);
-  redirect(profile?.username ? `/u/${encodeURIComponent(profile.username)}?lang=${language}` : "/");
+  const { data: deleted, error } = await supabase.from("posts").delete().eq("id", postId).eq("author_id", userId).select("id").maybeSingle();
+  if (error || !deleted) redirect(`/posts/${postId}?lang=${language}&error=delete_failed`);
+  redirect(profile?.username ? `/u/${encodeURIComponent(profile.username)}?lang=${language}&deleted=1` : `/?lang=${language}`);
 }
 
 export async function updatePost(formData: FormData) {
@@ -67,7 +67,7 @@ export async function updatePost(formData: FormData) {
     redirect(`/auth/login?lang=${language}&returnTo=/posts/${postId}/edit`);
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("posts")
     .update({
       title: result.title,
@@ -76,11 +76,13 @@ export async function updatePost(formData: FormData) {
       language: result.language,
     })
     .eq("id", postId)
-    .eq("author_id", userId);
+    .eq("author_id", userId)
+    .select("id")
+    .maybeSingle();
 
-  if (error) {
+  if (error || !updated) {
     redirect(`/posts/${postId}/edit?lang=${language}&error=update_failed`);
   }
 
-  redirect(`/posts/${postId}?lang=${language}`);
+  redirect(`/posts/${postId}?lang=${language}&updated=1`);
 }

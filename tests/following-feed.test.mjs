@@ -37,9 +37,9 @@ test("invalid explicit feed is redirected to the canonical all URL", () => {
   assert.match(homePage, /redirect\(followingFeedHref\(initialLanguage, feed, category\)\)/);
 });
 
-test("root html language comes from the URL-derived request header", () => {
+test("root html language comes from the resolved URL or saved preference header", () => {
   assert.match(sessionProxy, /x-kcny-language/);
-  assert.match(sessionProxy, /searchParams\.get\("lang"\) === "KR" \? "KR" : "CN"/);
+  assert.match(sessionProxy, /resolveLanguagePreference\(explicitLanguage, savedLanguage\)/);
   assert.match(rootLayout, /headers\(\)/);
   assert.match(rootLayout, /htmlLanguage\(language\)/);
   assert.match(middleware, /proxy as middleware/);
@@ -70,5 +70,6 @@ test("following feed provides login CTA with safe internal returnTo", () => {
 test("following feed tabs and category controls are accessible and URL driven", () => {
   assert.match(homeClient, /className="feed-tabs" aria-label/);
   assert.match(homeClient, /aria-current=\{feed === "all" \? "page" : undefined\}/);
-  assert.match(homeClient, /navigate\(language, feed, item\)/);
+  assert.match(homeClient, /href=\{followingFeedHref\(language, feed, item\)\}/);
+  assert.match(homeClient, /href=\{followingFeedHref\(language, feed\)\}/);
 });

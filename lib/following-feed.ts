@@ -36,8 +36,9 @@ export function followingFeedLabels(language: Language) {
       };
 }
 
-export function followingFeedHref(language: Language, feed: FeedMode, category?: PostCategory) {
+export function followingFeedHref(language: Language, feed: FeedMode, category?: PostCategory, before?: string) {
   const params = new URLSearchParams({ lang: language, feed });
   if (category) params.set("category", category);
+  if (before) params.set("before", before);
   return `/?${params.toString()}`;
 }

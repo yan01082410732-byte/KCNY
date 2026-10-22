@@ -1,5 +1,5 @@
 import { resendConfirmation, signIn } from "../actions";
-import { normalizeLanguage, safeReturnTo } from "@/lib/auth";
+import { authPageHref, normalizeLanguage, safeAuthReturnTo } from "@/lib/auth";
 import { message } from "@/lib/auth-messages";
 import { AuthSubmitButton } from "@/components/AuthSubmitButton";
 
@@ -11,6 +11,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const language = normalizeLanguage(params.lang);
   const korean = language === "KR";
+  const returnTo = safeAuthReturnTo(params.returnTo);
 
   const copy = korean
     ? {
@@ -28,6 +29,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
         resending: "인증 이메일을 보내는 중…",
         resent:
           "해당 이메일에 확인 대기 중인 계정이 있다면 새 인증 이메일이 전송되었습니다. 받은편지함과 스팸함을 확인해 주세요.",
+        returnNotice: "로그인 후 이전 페이지로 돌아갑니다.",
       }
     : {
         title: "登录",
@@ -43,6 +45,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
         resending: "正在重新发送验证邮件…",
         resent:
           "如果该邮箱有待确认的账户，新的验证邮件已发送，请检查收件箱和垃圾邮件。",
+        returnNotice: "登录后将返回刚才的页面。",
       };
 
   return (
@@ -55,11 +58,12 @@ export default async function Page({ searchParams }: LoginPageProps) {
         {params.notice === "confirmation_resent" && (
           <p className="auth-notice">{copy.resent}</p>
         )}
-        {params.error && <p className="auth-error">{message(params.error, language)}</p>}
+        {params.error && <p className="auth-error" role="alert">{message(params.error, language)}</p>}
+        {returnTo !== "/" && <p className="auth-notice">{copy.returnNotice}</p>}
 
         <form action={signIn}>
           <input type="hidden" name="language" value={language} />
-          <input type="hidden" name="returnTo" value={safeReturnTo(params.returnTo)} />
+          <input type="hidden" name="returnTo" value={returnTo} />
           <label htmlFor="email">
             {copy.email}
             <input id="email" name="email" type="email" autoComplete="email" required />
@@ -82,6 +86,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
           <p>{copy.resendDescription}</p>
           <form action={resendConfirmation}>
             <input type="hidden" name="language" value={language} />
+            <input type="hidden" name="returnTo" value={returnTo} />
             <label htmlFor="resendEmail">
               {copy.email}
               <input
@@ -96,7 +101,7 @@ export default async function Page({ searchParams }: LoginPageProps) {
           </form>
         </section>
 
-        <a href={`/auth/signup?lang=${language}`}>{copy.signup}</a>
+        <a href={authPageHref("signup", language, returnTo)}>{copy.signup}</a>
       </section>
     </main>
   );

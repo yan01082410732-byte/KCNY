@@ -16,7 +16,7 @@ export function Header({ language, onLanguageChange, languageHref, authenticated
   const korean = language === "KR";
   return <header><div className="shell nav">
     <a className="brand" href={`/?lang=${language}`}><span>K</span>CNY</a>
-    <nav><a href={`/?lang=${language}#feed`}>Community</a><a href={`/search?lang=${language}`}>{korean ? "검색" : "搜索"}</a><a href={`/coming-soon?lang=${language}`}>Discover</a><a href={`/coming-soon?lang=${language}`}>About</a></nav>
+    <nav><a href={`/?lang=${language}#feed`}>{korean ? "커뮤니티" : "社区"}</a><a href={`/search?lang=${language}`}>{korean ? "검색" : "搜索"}</a><a href={`/coming-soon?lang=${language}`}>{korean ? "발견" : "发现"}</a><a href={`/coming-soon?lang=${language}`}>{korean ? "소개" : "关于"}</a></nav>
     <div className="nav-actions">
       <div className="language" aria-label="Language">{languageHref ? <><a className={language === "CN" ? "selected" : ""} href={languageHref("CN")}>中文</a><a className={korean ? "selected" : ""} href={languageHref("KR")}>한국어</a></> : <><button type="button" className={language === "CN" ? "selected" : ""} onClick={() => onLanguageChange("CN")}>中文</button><button type="button" className={korean ? "selected" : ""} onClick={() => onLanguageChange("KR")}>한국어</button></>}</div>
       {authenticated ? <><NotificationBell language={language} /><UserMenu language={language} username={username} displayName={displayName} /></> : <><a className="signin" href={`/auth/login?lang=${language}`}>{korean ? "로그인" : "登录"}</a><a className="signin secondary-link" href={`/auth/signup?lang=${language}`}>{korean ? "회원가입" : "注册"}</a></>}

@@ -30,7 +30,7 @@ test("username route allows KCNY username",()=>assert.equal(isSafeUsername("test
 test("public profile avatar uses display name first character",()=>assert.equal(profileAvatarInitial({display_name:"김민지",username:"minji"}),"김"));
 
 test("user menu CN labels",()=>assert.equal(userMenuLabels("CN").profile,"我的主页"));
-test("user menu KR labels",()=>assert.equal(userMenuLabels("KR").settings,"프로필 편집"));
+test("user menu KR labels",()=>assert.equal(userMenuLabels("KR").settings,"계정 설정"));
 test("user menu profile link encodes a valid username",()=>assert.equal(userMenuProfileHref("test_user"),"/u/test_user"));
 test("user menu profile link preserves the selected language",()=>assert.equal(userMenuProfileHref("test_user","KR"),"/u/test_user?lang=KR"));
 test("user menu missing username has no profile link",()=>assert.equal(userMenuProfileHref(undefined),undefined));
@@ -40,7 +40,7 @@ test("user menu avatar falls back to username",()=>assert.equal(userMenuAvatarIn
 test("user menu avatar final fallback is K",()=>assert.equal(userMenuAvatarInitial(),"K"));
 test("user menu is initially aria collapsed",()=>assert.equal(userMenuButtonState(false)["aria-expanded"],false));
 test("user menu exposes menu popup semantics",()=>assert.equal(userMenuButtonState(false)["aria-haspopup"],"menu"));
-test("home page forwards the normalized query language to its client component",()=>{const source=readFileSync("app/page.tsx","utf8");assert.match(source,/searchParams: Promise<\{ lang\?: string \}>/);assert.match(source,/initialLanguage=\{initialLanguage\}/);});
+test("home page forwards the normalized query language to its client component",()=>{const source=readFileSync("app/page.tsx","utf8");assert.match(source,/searchParams: Promise<\{ lang\?: string; feed\?: string; category\?: string; before\?: string; error\?: string \}>/);assert.match(source,/initialLanguage=\{initialLanguage\}/);});
 test("home page client uses the server URL language as its source of truth",()=>{const source=readFileSync("components/HomePageClient.tsx","utf8");assert.match(source,/const language = initialLanguage/);assert.doesNotMatch(source,/setLanguage\(/);});
 test("narrow layout uses targeted sizing rather than hiding horizontal overflow",()=>{const source=readFileSync("app/globals.css","utf8");assert.match(source,/@media \(max-width:320px\)/);assert.doesNotMatch(source,/overflow-x\s*:\s*hidden/);});
 test("profile grid allows its text column to shrink on narrow screens",()=>{const source=readFileSync("app/globals.css","utf8");assert.match(source,/\.profile-card\s*\{[^}]*grid-template-columns:auto minmax\(0,1fr\)/);assert.match(source,/\.profile-heading,.profile-details,.profile-details > div,.profile-posts\s*\{\s*min-width:0/);assert.match(source,/\.profile-heading h1,.profile-heading p,.profile-details dd\s*\{[^}]*overflow-wrap:anywhere/);});

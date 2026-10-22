@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { notificationReadSucceeded, type NotificationReadState } from "@/lib/notification-read";
 
 async function context(formData: FormData) {
   const language = normalizeLanguage(formData.get("language"));
@@ -19,18 +20,24 @@ function validNotificationId(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
 }
 
-export async function markAllNotificationsRead(formData: FormData) {
-  const { supabase, userId, language } = await context(formData);
-  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("recipient_id", userId).is("read_at", null);
+export async function markAllNotificationsRead(_previous: NotificationReadState, formData: FormData): Promise<NotificationReadState> {
+  const { supabase, userId } = await context(formData);
+  try {
+    const { error, count } = await supabase.from("notifications").update({ read_at: new Date().toISOString() }, { count: "exact" }).eq("recipient_id", userId).is("read_at", null);
+    if (!notificationReadSucceeded(error, count, false)) return { status: "error" };
+  } catch { return { status: "error" }; }
   revalidatePath("/notifications");
-  redirect(`/notifications?lang=${language}`);
+  return { status: "success" };
 }
 
-export async function markNotificationRead(formData: FormData) {
-  const { supabase, userId, language } = await context(formData);
+export async function markNotificationRead(_previous: NotificationReadState, formData: FormData): Promise<NotificationReadState> {
+  const { supabase, userId } = await context(formData);
   const notificationId = formData.get("notificationId");
-  if (!validNotificationId(notificationId)) redirect(`/notifications?lang=${language}`);
-  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", notificationId).eq("recipient_id", userId).is("read_at", null);
+  if (!validNotificationId(notificationId)) return { status: "error" };
+  try {
+    const { error, count } = await supabase.from("notifications").update({ read_at: new Date().toISOString() }, { count: "exact" }).eq("id", notificationId).eq("recipient_id", userId);
+    if (!notificationReadSucceeded(error, count, true)) return { status: "error" };
+  } catch { return { status: "error" }; }
   revalidatePath("/notifications");
-  redirect(`/notifications?lang=${language}`);
+  return { status: "success" };
 }

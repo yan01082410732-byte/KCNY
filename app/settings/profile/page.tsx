@@ -16,7 +16,9 @@ export default async function ProfileSettingsPage({ searchParams }: { searchPara
   if (!userId) redirect(`/auth/login?lang=${language}&returnTo=/settings/profile`);
 
   const { data: profile } = await supabase.from("profiles").select("username, display_name, bio, preferred_language").eq("id", userId).maybeSingle();
-  if (!profile?.username || (profile.preferred_language !== "CN" && profile.preferred_language !== "KR")) redirect(`/auth/login?lang=${language}&returnTo=/settings/profile`);
+  if (!profile?.username || (profile.preferred_language !== "CN" && profile.preferred_language !== "KR")) {
+    return <main className="auth-page"><section className="auth-card" role="alert"><h1>{language === "KR" ? "설정을 불러오지 못했습니다" : "无法加载设置"}</h1><p>{language === "KR" ? "잠시 후 다시 시도해 주세요." : "请稍后重试。"}</p><a href={`/settings/profile?lang=${language}`}>{language === "KR" ? "다시 시도" : "重试"}</a></section></main>;
+  }
 
   return <ProfileSettingsClient profile={profile} initialLanguage={language} notice={params.notice} error={params.error} />;
 }

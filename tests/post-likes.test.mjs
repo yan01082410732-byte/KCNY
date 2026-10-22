@@ -78,9 +78,11 @@ test("like UI is a form with pressed state and pending support", () => {
   assert.match(likeButton, /aria-pressed=\{liked\}/);
   assert.doesNotMatch(likeButton, /localStorage|window\.confirm|alert\(/);
 });
-test("all post pages batch select like rows", () => {
+test("all post pages fetch aggregate counts and viewer-scoped like state", () => {
   for (const source of [homePage, detailPage, profilePage]) {
     assert.match(source, /from\("post_likes"\)/);
-    assert.match(source, /applyPostLikeState/);
+    assert.match(source, /post_likes\(count\)/);
+    assert.match(source, /applyViewerLikeState/);
+    assert.match(source, /\.eq\("user_id", (?:userId|currentUserId)\)/);
   }
 });

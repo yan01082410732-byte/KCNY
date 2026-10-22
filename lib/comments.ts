@@ -36,6 +36,14 @@ export type CommentThread = {
   replies: PublicComment[];
 };
 
+export function commentDraftKey(userId: string, postId: string, parentCommentId?: string) {
+  return `kcny-comment-draft-v1:${userId}:${postId}:${parentCommentId ?? "root"}`;
+}
+
+export function canSubmitCommentDraft(content: string, pending: boolean, locked: boolean) {
+  return content.trim().length > 0 && content.trim().length <= 1000 && !pending && !locked;
+}
+
 export function validateCommentInput(input: {
   postId: unknown;
   content: unknown;
@@ -79,6 +87,24 @@ export function replyTargetUsername(parent: Pick<PublicComment, "author"> | unde
 
 export function commentCountLabel(count: number, language: CommentLanguage) {
   return language === "KR" ? `댓글 ${count}` : `${count} 条评论`;
+}
+
+export function commentErrorMessage(error: unknown, language: CommentLanguage) {
+  const korean = language === "KR";
+  switch (error) {
+    case "invalid_comment": return korean ? "댓글은 1~1000자로 입력해 주세요." : "评论内容须为 1–1000 字。";
+    case "auth_required": return korean ? "로그인이 필요합니다. 작성한 내용은 이 탭에 보관됩니다." : "请先登录；草稿会保留在当前标签页。";
+    case "invalid_post": return korean ? "게시글을 찾을 수 없습니다. 작성한 내용은 보관됩니다." : "帖子已不可用；草稿已保留。";
+    case "permission": return korean ? "작성 권한이 없습니다. 작성한 내용은 보관됩니다." : "没有提交权限；草稿已保留。";
+    case "network_failed": return korean ? "연결 오류가 발생했습니다. 중복 게시를 피하려면 먼저 등록 여부를 확인해 주세요. 초안은 보관됩니다." : "网络异常。为避免重复发布，请先确认内容是否已出现；草稿仍保留。";
+    case "invalid_parent_comment":
+    case "reply_failed": return korean ? "답글을 등록하지 못했습니다. 원 댓글을 확인하고 다시 시도해 주세요." : "回复失败，请确认父评论仍可用后重试。";
+    case "delete_comment_failed": return korean ? "댓글을 삭제하지 못했습니다. 다시 시도해 주세요." : "删除评论失败，请重试。";
+    case "comment_failed":
+    case "configuration":
+    case "invalid_language": return korean ? "댓글을 저장하지 못했습니다. 다시 시도해 주세요." : "暂时无法保存评论，请重试。";
+    default: return undefined;
+  }
 }
 
 export function toPublicComments(rows: unknown[], currentUserId?: string): PublicComment[] {

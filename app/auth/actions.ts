@@ -2,9 +2,11 @@
 
 import { redirect } from "next/navigation";
 import {
+  authPageHref,
+  destinationWithLanguage,
   isLanguage,
   normalizeLanguage,
-  safeReturnTo,
+  safeAuthReturnTo,
   validateResendConfirmation,
   validateSignIn,
   validateSignUp,
@@ -12,17 +14,21 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { classifyAuthError, logServiceFailure, type AuthFailure } from "@/lib/service-errors";
 
-function authCallbackUrl(language: "CN" | "KR") {
-  return `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback?lang=${language}`;
+function authCallbackUrl(language: "CN" | "KR", returnTo: string) {
+  const url = new URL("/auth/callback", process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
+  url.searchParams.set("lang", language);
+  if (returnTo !== "/") url.searchParams.set("next", returnTo);
+  return url.toString();
 }
 
 export async function signUp(formData: FormData) {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
   const preferredLanguage = formData.get("preferredLanguage");
+  const returnTo = safeAuthReturnTo(formData.get("returnTo"));
 
   if (!isLanguage(rawLanguage) || !isLanguage(preferredLanguage)) {
-    redirect(`/auth/signup?lang=${language}&error=invalid_language`);
+    redirect(authPageHref("signup", language, returnTo, { kind: "error", value: "invalid_language" }));
   }
 
   const input = {
@@ -36,19 +42,19 @@ export async function signUp(formData: FormData) {
   const error = validateSignUp(input);
 
   if (error) {
-    redirect(`/auth/signup?lang=${language}&error=${error}`);
+    redirect(authPageHref("signup", language, returnTo, { kind: "error", value: error }));
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    redirect(`/auth/signup?lang=${language}&error=configuration`);
+    redirect(authPageHref("signup", language, returnTo, { kind: "error", value: "configuration" }));
   }
 
-  const { error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,
     options: {
-      emailRedirectTo: authCallbackUrl(language),
+      emailRedirectTo: authCallbackUrl(language, returnTo),
       data: {
         username: input.username,
         display_name: input.displayName,
@@ -58,35 +64,37 @@ export async function signUp(formData: FormData) {
   });
 
   if (signUpError) {
-    redirect(`/auth/signup?lang=${language}&error=auth_failed`);
+    redirect(authPageHref("signup", language, returnTo, { kind: "error", value: "auth_failed" }));
   }
 
-  redirect(`/auth/login?lang=${language}&notice=check_email`);
+  if (signUpData.session) redirect(destinationWithLanguage(returnTo, language));
+  redirect(authPageHref("login", language, returnTo, { kind: "notice", value: "check_email" }));
 }
 
 export async function signIn(formData: FormData) {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
+  const returnTo = safeAuthReturnTo(formData.get("returnTo"));
 
   if (!isLanguage(rawLanguage)) {
-    redirect(`/auth/login?lang=${language}&error=invalid_language`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: "invalid_language" }));
   }
 
   const input = {
     email: String(formData.get("email") || ""),
     password: String(formData.get("password") || ""),
     language,
-    returnTo: safeReturnTo(formData.get("returnTo")),
+    returnTo,
   };
   const error = validateSignIn(input);
 
   if (error) {
-    redirect(`/auth/login?lang=${language}&error=${error}`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: error }));
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    redirect(`/auth/login?lang=${language}&error=configuration`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: "configuration" }));
   }
 
   let failure: AuthFailure | undefined;
@@ -103,14 +111,15 @@ export async function signIn(formData: FormData) {
     failure = classifyAuthError(error);
     logServiceFailure("sign-in", error);
   }
-  if (failure) redirect(`/auth/login?lang=${language}&error=${failure}`);
+  if (failure) redirect(authPageHref("login", language, returnTo, { kind: "error", value: failure }));
 
-  redirect(input.returnTo);
+  redirect(destinationWithLanguage(input.returnTo, language));
 }
 
 export async function resendConfirmation(formData: FormData) {
   const rawLanguage = formData.get("language");
   const language = normalizeLanguage(rawLanguage);
+  const returnTo = safeAuthReturnTo(formData.get("returnTo"));
   const email = String(formData.get("email") || "");
   const error = validateResendConfirmation({
     email,
@@ -118,25 +127,25 @@ export async function resendConfirmation(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/auth/login?lang=${language}&error=${error}`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: error }));
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    redirect(`/auth/login?lang=${language}&error=configuration`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: "configuration" }));
   }
 
   const { error: resendError } = await supabase.auth.resend({
     type: "signup",
     email,
     options: {
-      emailRedirectTo: authCallbackUrl(language),
+      emailRedirectTo: authCallbackUrl(language, returnTo),
     },
   });
 
   if (resendError) {
-    redirect(`/auth/login?lang=${language}&error=resend_failed`);
+    redirect(authPageHref("login", language, returnTo, { kind: "error", value: "resend_failed" }));
   }
 
-  redirect(`/auth/login?lang=${language}&notice=confirmation_resent`);
+  redirect(authPageHref("login", language, returnTo, { kind: "notice", value: "confirmation_resent" }));
 }

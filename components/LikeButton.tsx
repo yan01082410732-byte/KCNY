@@ -12,20 +12,21 @@ type Props = {
   language: Language;
   returnTo: string;
   authenticated: boolean;
+  unavailable?: boolean;
 };
 
-function LikeSubmitButton({ liked, language, likeCount }: Pick<Props, "liked" | "language" | "likeCount">) {
+function LikeSubmitButton({ liked, language, likeCount, unavailable }: Pick<Props, "liked" | "language" | "likeCount" | "unavailable">) {
   const { pending } = useFormStatus();
   const labels = postLikeLabels(language);
-  const label = pending ? labels.pending : liked ? labels.unlike : labels.like;
+  const label = unavailable ? labels.unavailable : pending ? labels.pending : liked ? labels.unlike : labels.like;
 
   return (
     <button
       type="submit"
       className={`like-button${liked ? " liked" : ""}`}
-      aria-label={label}
+      aria-label={`${label} · ${likeCount}`}
       aria-pressed={liked}
-      disabled={pending}
+      disabled={pending || unavailable}
     >
       <span aria-hidden="true">{liked ? "♥" : "♡"}</span>
       <span>{label}</span>
@@ -34,7 +35,7 @@ function LikeSubmitButton({ liked, language, likeCount }: Pick<Props, "liked" | 
   );
 }
 
-export function LikeButton({ postId, likeCount, liked, language, returnTo, authenticated }: Props) {
+export function LikeButton({ postId, likeCount, liked, language, returnTo, authenticated, unavailable }: Props) {
   const labels = postLikeLabels(language);
   const action = liked ? unlikePostAction : likePostAction;
 
@@ -44,9 +45,10 @@ export function LikeButton({ postId, likeCount, liked, language, returnTo, authe
         <input type="hidden" name="postId" value={postId} />
         <input type="hidden" name="language" value={language} />
         <input type="hidden" name="returnTo" value={returnTo} />
-        <LikeSubmitButton liked={liked} language={language} likeCount={likeCount} />
+        <LikeSubmitButton liked={liked} language={language} likeCount={likeCount} unavailable={unavailable} />
       </form>
       {!authenticated && <p className="like-signin-hint">{labels.signIn}</p>}
+      {unavailable && <p className="like-signin-hint" role="alert">{labels.unavailable}</p>}
     </div>
   );
 }

@@ -230,6 +230,5 @@ test("post editor language select retains CN and KR values", () => {
 });
 
 test("post editor initial state comes from the server post", () => {
-  assert.match(editor, /useState<Language>\(post\.language\)/);
-  assert.match(editor, /useState<PostCategory>\(post\.category\)/);
+  assert.match(editor, /usePostDraft\(viewerId, \{ title: post\.title, content: post\.content, category: post\.category, language: post\.language \}, post\.id\)/);
 });

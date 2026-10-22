@@ -27,10 +27,11 @@ export function sliceCommentPage(comments: PublicComment[]) {
   return { items, nextCursor: comments.length > COMMENT_PAGE_SIZE && items.length ? encodeCommentCursor(items[items.length - 1]) : undefined };
 }
 
-export function commentPageHref(postId: string, language: "CN" | "KR", cursor?: string) {
+export function commentPageHref(postId: string, language: "CN" | "KR", cursor?: string, commentId?: string) {
   const query = new URLSearchParams({ lang: language });
   if (cursor) query.set("commentsAfter", cursor);
-  return `/posts/${encodeURIComponent(postId)}?${query.toString()}#comments`;
+  if (!cursor && commentId) query.set("comment", commentId);
+  return `/posts/${encodeURIComponent(postId)}?${query.toString()}${!cursor && commentId ? `#comment-${encodeURIComponent(commentId)}` : "#comments"}`;
 }
 
 export function pageWithParentContext(items: PublicComment[], parents: PublicComment[]) {
