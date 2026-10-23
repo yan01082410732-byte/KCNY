@@ -1,5 +1,21 @@
 # KCNY bug and acceptance backlog
 
+## Isolated real acceptance update — 2026-10-23 (017-ENV)
+
+See `main-e2e-017-env.md`. E2E-017-01/02 are resolved for the independent project `kirvcbkbkvotnsqnbcyf`, not the shared Preview/Production backend. Both ordinary synthetic accounts logged in; confirmed core interaction flows and screenshots now exist. Earlier historical rows below remain for traceability, not as current blanket browser blockers. Report persistence/admin authority/media/preferences contracts remain blocked.
+
+| ID | Status | Evidence / follow-up |
+|---|---|---|
+| E2E-ENV-01 | Local configuration caveat | Do not mix 127.0.0.1 and localhost: language redirect changes local hostname and host-only session cookies do not follow. Canonical localhost passed authenticated language navigation/reload. |
+| E2E-ENV-02 | Non-critical acceptance instability / deferred | One new reply notification was absent during the complete browser batch despite correct persisted recipient/row; fresh legitimate login rendered it and deep link passed. Bound a future freshness/cache investigation; do not claim all runs passed. |
+| E2E-ENV-03 | Test harness corrected | Wait for edit-route URL and heading before filling content; the prior selector could match the detail comment field during navigation. Actual edit/save passed targeted recheck. |
+| E2E-ENV-04 | Acceptance pending | Confirm email restored after explicitly approved synthetic signup exception. Actual mail delivery/verification and naturally expired sessions remain untested. |
+| E2E-ENV-05 | Non-critical advisory follow-up | Existing set_updated_at search_path / trigger-function execute advisor warnings retained. No confirmed privilege escalation; no shared schema changed. |
+| E2E-ENV-06 | Environment evidence / deferred | Restricted Node-REPL browser network failed; approved terminal browser succeeded. Dev-mode Event exceptions not reproduced in optimized build. Preserve diagnostics without inferring an application cause. |
+| E2E-ENV-07 | Partial acceptance | Create/edit/profile save, comments/replies, notification types/read badge, like/follow, data-backed search, language persistence and 390/820px authenticated views passed in real browser. Large pagination, all mutation failure modes and actual iPad hardware remain pending. |
+
+No confirmed critical source defect was found. Test-only reply integrity is installed; Production migration authorization remains separate. Historical 28 ERR_ABORTED remain UNKNOWN.
+
 Like integration delivery 2026-10-21 (KCNY-MAIN-20261021-012): no confirmed new critical defect remains in the affected source. Post-like totals now come from relation aggregates rather than potentially truncated like-row lists; current-user state is fetched separately. Existing notification triggers remain unchanged.
 
 | ID | Priority / status | Finding and planned follow-up |
@@ -103,3 +119,14 @@ One consolidated retrospective found no confirmed critical source regression. Au
 | CONSOL-016-02 | Environment / data acceptance blocked | No local Supabase environment variables or `.env` were available. Local 200 responses establish route rendering only, not database-backed content correctness. Use a separately approved non-production configuration. |
 | CONSOL-016-03 | Product / test account blocker | Two historical test-account passwords are unknown. Obtain approved non-production user authentication without guessing, password extraction, privileged impersonation or unapproved reset. |
 | CONSOL-016-04 | Non-critical tooling | Both npm and pnpm lockfiles exist, while README and current test command use npm. Avoid dependency changes until the team chooses one canonical lockfile under a separate review. |
+
+# Non-production browser acceptance 2026-10-22 (KCNY-MAIN-20261022-017)
+
+Local Chromium browser automation now works outside the repository. Thirteen public-route, interaction, language and responsive checks passed; no browser page error was observed. See `main-e2e-017.md`. This closes the browser-runtime portion of CONSOL-016-01 and AUTH-015-01, **not** authenticated acceptance.
+
+| ID | Class / status | Finding and next action |
+|---|---|---|
+| E2E-017-01 | Environment / blocked | No verified non-production Supabase project or public client configuration was available. Home visibly showed the data-load error state. Verify the project is non-production before testing data-backed search, feed, post detail or mutations. |
+| E2E-017-02 | Authentication / blocked | No approved two-account login method or existing authenticated session was available. Do not guess/reset passwords or use privileged impersonation; obtain a legitimate non-production test login route. |
+| E2E-017-03 | Acceptance / pending | After the two gates above, test registration, session restoration, post/comment/reply, like, follow, notifications and profile settings in two isolated browser contexts. Public-page passes do not establish these outcomes. |
+| E2E-017-04 | Confirmed environment isolation blocker | On 2026-10-22, the Vercel Preview URL and Production's public static scripts both identified Supabase project `czcyarmramlpmilfhpqo`. Preview mutations would reach the shared Production backend. Do not connect localhost to it for write acceptance. Request a separate test project as specified in `NON_PRODUCTION_ENVIRONMENT_REQUEST_017.md`. No application defect is inferred from this configuration. |
