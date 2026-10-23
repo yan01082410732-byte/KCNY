@@ -4,6 +4,8 @@ Owner-authorized Production release of TASK 007–015, 2026-10-23 KST.
 
 Application source baseline: `9d75804748137e78ee8b1c6eebe069b209708206` (TASK 016 checkpoint). TASK 017 changed local environment and acceptance documentation, not application source. This release preserves that tested source. Release commit and deployed IDs are recorded in the external execution receipt after deployment, avoiding a self-referential commit hash in this file.
 
+Release-only addition: `GET /api/release-check` evaluates Production environment, backend URL, site URL and public-client presence inside the running deployment. It returns only booleans, has no database/auth side effects, is not cached, and returns 503 for an incorrect configuration. This permits checking sensitive-marked public configuration without exporting Production values to disk. Three focused tests cover wrong/test environments, localhost/missing callback config and secret non-disclosure. Existing product-flow source remains identical to the accepted checkpoint.
+
 Target: GitHub `yan01082410732-byte/KCNY`; dedicated branch `codex/release-main-20261023-018`; Vercel project `kcny` / `prj_7Q90QVY7HilMNGKK7wxdgnXNjfIs`; team `team_s5ssiZaSYWtndwapRbti6Dxs`; domain `kcny.vercel.app`.
 
 Production backend: `czcyarmramlpmilfhpqo`. Independent acceptance backend `kirvcbkbkvotnsqnbcyf` is excluded from the deployment. Deployment source comes from this clean release checkout, without local `.env` files, browser state, credentials, test fixture data or build caches. `.vercelignore` additionally excludes SQL, test runners, documentation and local reports from the uploaded runtime package. `.vercel/` is Git-ignored.
