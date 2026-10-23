@@ -146,3 +146,14 @@ One targeted retrospective completed. The isolated reporting module is runnable;
 | REPORT-019-07 | Reviewed security exceptions | Four private deny-all RLS tables and four narrow authenticated definer RPCs produce expected advisor notices. Effective grants, fixed search_path and real denial tests verified; see `reporting-security-019.md`. Inherited unrelated warnings remain documented, not silently changed. |
 
 The existing media/Storage and notification-type preference gates remain separate. AI assistance is not connected; human review does not imply automated punishment. The 28 historical ERR_ABORTED remain UNKNOWN.
+
+# Controlled reporting release 2026-10-24 (TASK 020)
+
+| ID | Status | Finding |
+|---|---|---|
+| REPORT-020-01 | Activation gate | No trustworthy binding of the owner's real Production Auth UUID. Do not infer it from dashboard login, similar email/name or account order. Membership remains empty and dual switches off. |
+| REPORT-020-02 | Maintenance acceptance blocked | Manual 90-day sensitive-content clearing draft exists, but management calls returned requestState errors, not actual execution results. Synthetic fixture/guard remained unchanged; no passing result invented. Complete genuine acceptance before enabling. See reporting-retention-020.md. |
+| REPORT-020-03 | Security patch completed | Owner approved minimal Next 15.5.28 patch after advisory discovery; both lockfiles synchronized, audit zero, unit/build and changed-path browser controls passed. No unrelated upgrade. |
+| REPORT-020-04 | Non-critical | Backup/log/export lifetimes and disposal need an operational decision before real retention clearing; logical row redaction is not immediate physical erasure. No automated purge or real record deletion enabled. |
+
+TASK 019 isolated acceptance remains accepted; these are Production activation/operations gates, not a reason to restart form development. Next feature area remains image upload, separately scoped.

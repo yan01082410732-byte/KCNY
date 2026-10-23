@@ -15,9 +15,11 @@ export type ReportCase = {
 };
 export type ReviewEvent = { id: string; actor_id: string; from_status: ReviewStatus | null; to_status: ReviewStatus; decision_reason: string; internal_note: string; created_at: string };
 
-// Server flag plus an exact isolated-project allowlist. Never globally enable production.
+// Explicit project/environment allowlist. Every deployment remains opt-in and DB-gated.
 export function reportsEnvironmentEnabled(env: Record<string, string | undefined>) {
-  return env.KCNY_REPORTS_ENABLED === "true" && env.NEXT_PUBLIC_SUPABASE_URL === "https://kirvcbkbkvotnsqnbcyf.supabase.co";
+  if (env.KCNY_REPORTS_ENABLED !== "true") return false;
+  if (env.NEXT_PUBLIC_SUPABASE_URL === "https://czcyarmramlpmilfhpqo.supabase.co") return env.VERCEL_ENV === "production";
+  return env.NEXT_PUBLIC_SUPABASE_URL === "https://kirvcbkbkvotnsqnbcyf.supabase.co" && env.VERCEL_ENV !== "production";
 }
 export function isReviewStatus(value: unknown): value is ReviewStatus {
   return value === "pending" || value === "under_review" || value === "resolved" || value === "dismissed";

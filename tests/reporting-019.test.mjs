@@ -5,7 +5,7 @@ import { reportsEnvironmentEnabled, reportFailure, isReviewStatus, canTransition
 const read = f => readFileSync(new URL(`../${f}`, import.meta.url), "utf8");
 const migration = read("supabase/migrations/20261023124108_reports_complaints_review.sql");
 
-test("reporting activation fails closed outside the explicitly enabled isolated project", () => {
+test("reporting activation fails closed without a recognized opted-in environment", () => {
   assert.equal(reportsEnvironmentEnabled({}), false);
   assert.equal(reportsEnvironmentEnabled({ KCNY_REPORTS_ENABLED: "true", NEXT_PUBLIC_SUPABASE_URL: "https://czcyarmramlpmilfhpqo.supabase.co" }), false);
   assert.equal(reportsEnvironmentEnabled({ KCNY_REPORTS_ENABLED: "true", NEXT_PUBLIC_SUPABASE_URL: "https://kirvcbkbkvotnsqnbcyf.supabase.co" }), true);

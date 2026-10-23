@@ -8,6 +8,7 @@ node_modules
 docs
 tests
 /supabase/
+/ops/
 KCNY_*
 TASK_*
 playwright-report
