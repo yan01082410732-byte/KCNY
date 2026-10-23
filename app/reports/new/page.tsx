@@ -3,6 +3,7 @@ import { ReportForm } from "@/components/ReportForm";
 import { normalizeLanguage } from "@/lib/auth";
 import { isReportTarget, type ReportKind, type ReportTargetType } from "@/lib/reporting";
 import { createClient } from "@/lib/supabase/server";
+import { reportingContext } from "@/lib/report-server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,5 +20,6 @@ export default async function NewReportPage({ searchParams }: { searchParams: Pr
     redirect(`/auth/login?lang=${language}&returnTo=${encodeURIComponent(returnTo)}`);
   }
   const { data: profile } = await supabase!.from("profiles").select("username, display_name").eq("id", data.claims.sub).maybeSingle();
-  return <ReportForm key={`${kind}:${params.targetType}:${params.targetId}`} kind={kind} targetType={targetValid ? params.targetType as ReportTargetType : undefined} targetId={targetValid ? params.targetId : undefined} language={language} username={profile?.username} displayName={profile?.display_name ?? undefined} />;
+  const { enabled } = await reportingContext();
+  return <ReportForm key={`${kind}:${params.targetType}:${params.targetId}`} kind={kind} targetType={targetValid ? params.targetType as ReportTargetType : undefined} targetId={targetValid ? params.targetId : undefined} language={language} username={profile?.username} displayName={profile?.display_name ?? undefined} enabled={enabled} />;
 }

@@ -41,14 +41,16 @@ test("submission checks verified claims and never writes without an approved con
   assert.match(action, /reason: "login_required"/);
   assert.equal(REPORT_PERSISTENCE_AVAILABLE, false);
   assert.doesNotMatch(action, /\.insert\(|service_role|auth\.admin/);
-  assert.match(read("components/ReportForm.tsx"), /disabled=\{pending \|\| !REPORT_PERSISTENCE_AVAILABLE\}/);
+  assert.match(action, /reportsEnvironmentEnabled\(process\.env\)/);
+  assert.match(action, /\.rpc\("submit_report"/);
+  assert.match(read("components/ReportForm.tsx"), /disabled=\{pending \|\| !enabled/);
 });
 
 test("report status requires authentication and never exposes fabricated records", () => {
   const page = read("app/reports/page.tsx");
-  assert.match(page, /auth\.getClaims\(\)/);
+  assert.match(read("lib/report-server.ts"), /auth\.getClaims\(\)/);
   assert.match(page, /redirect\(`\/auth\/login/);
-  assert.doesNotMatch(page, /\.from\("reports"\)/);
+  assert.match(page, /\.eq\("reporter_id", ctx\.userId\)/);
 });
 
 test("AI suggestion and human decision have separate typed provenance", () => {

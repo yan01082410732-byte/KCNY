@@ -130,3 +130,19 @@ Local Chromium browser automation now works outside the repository. Thirteen pub
 | E2E-017-02 | Authentication / blocked | No approved two-account login method or existing authenticated session was available. Do not guess/reset passwords or use privileged impersonation; obtain a legitimate non-production test login route. |
 | E2E-017-03 | Acceptance / pending | After the two gates above, test registration, session restoration, post/comment/reply, like, follow, notifications and profile settings in two isolated browser contexts. Public-page passes do not establish these outcomes. |
 | E2E-017-04 | Confirmed environment isolation blocker | On 2026-10-22, the Vercel Preview URL and Production's public static scripts both identified Supabase project `czcyarmramlpmilfhpqo`. Preview mutations would reach the shared Production backend. Do not connect localhost to it for write acceptance. Request a separate test project as specified in `NON_PRODUCTION_ENVIRONMENT_REQUEST_017.md`. No application defect is inferred from this configuration. |
+
+# Reporting persistence / human review 2026-10-23 (TASK 019)
+
+One targeted retrospective completed. The isolated reporting module is runnable; Production reporting remains disabled. Original entries above are historical and are not rewritten as if earlier acceptance had happened. Full evidence and failed-run/retest separation: `reports-complaints-019.md`.
+
+| ID | Class / status | Finding and follow-up |
+|---|---|---|
+| REPORT-019-01 | Critical development blocker — FIXED | Business version conflicts used SQLSTATE 40001, triggering PostgREST retries/timeouts. Follow-up migration uses PT409; stale version and one-winner concurrency real retests pass. Initial failure records retained. |
+| REPORT-019-02 | Input-loss defect — FIXED | Audit rejection rolled back correctly but reset uncontrolled review inputs. All review inputs are now controlled; identical fault retest preserves edits and database state. Temporary fault trigger removed. |
+| REPORT-019-03 | Product / Production approval gate | Reporting persistence/reviewer permissions are implemented and validated only in `kcny-e2e-017`. Production remains disabled pending `REPORTING_PRODUCTION_CHANGE_REQUEST_019.md`. This does not enable the old REPORT-014 infrastructure gate in Production. |
+| REPORT-019-04 | Non-critical operations decision | Approve retention/appeals/reviewer management before production enablement. Cases/audits intentionally survive target deletion; no auto-purge, bans or content deletion. |
+| REPORT-019-05 | Non-critical future scaling | Current 20-row indexed pages and 10/hour actor limit cover bounded access, not full anti-abuse or large-scale performance acceptance. Revisit only when product volume requires it. |
+| REPORT-019-06 | Future visibility contract | Target checks match today's public-read post/comment/profile contracts. New hidden/private content requires a specific access-validation review before reporting those targets. |
+| REPORT-019-07 | Reviewed security exceptions | Four private deny-all RLS tables and four narrow authenticated definer RPCs produce expected advisor notices. Effective grants, fixed search_path and real denial tests verified; see `reporting-security-019.md`. Inherited unrelated warnings remain documented, not silently changed. |
+
+The existing media/Storage and notification-type preference gates remain separate. AI assistance is not connected; human review does not imply automated punishment. The 28 historical ERR_ABORTED remain UNKNOWN.

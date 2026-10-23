@@ -53,6 +53,7 @@ export function UserMenu({ language, username, displayName }: { language: Langua
       <a role="menuitem" href={`/bookmarks?lang=${language}`} onClick={() => setOpen(false)}>{labels.bookmarks}</a>
       <a role="menuitem" href={`/posts/new?lang=${language}`} onClick={() => setOpen(false)}>{labels.createPost}</a>
       <a role="menuitem" href={`/reports/new?kind=complaint&lang=${language}`} onClick={() => setOpen(false)}>{labels.complaint}</a>
+      <a role="menuitem" href={`/reports?lang=${language}`} onClick={() => setOpen(false)}>{language === "KR" ? "내 신고 및 민원" : "我的举报与投诉"}</a>
       <form action="/auth/signout" method="post"><input type="hidden" name="language" value={language} /><button role="menuitem" type="submit">{labels.signOut}</button></form>
     </div>}
   </div>;

@@ -147,3 +147,16 @@ header { height:76px; background:rgba(251,250,247,.93); border-bottom:1px solid 
 .onboarding-links a { display:inline-flex; align-items:center; min-height:44px; max-width:100%; padding:9px 14px; border:1px solid var(--line); border-radius:12px; color:var(--ink); background:#fff; font-size:14px; font-weight:700; }
 .onboarding-links a:hover,.onboarding-links a:focus-visible { border-color:var(--ink); }
 @media (max-width:480px) { .onboarding-links span { flex-basis:100%; } .onboarding-links a { flex:1 1 calc(50% - 10px); justify-content:center; text-align:center; } }
+.cases-page { max-width: 960px; padding-block: 36px 72px; }
+.case-navigation, .case-filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-block: 20px; }
+.case-card { background: white; border: 1px solid var(--line, #dfe3e9); border-radius: 16px; padding: 24px; margin-block: 20px; overflow-wrap: anywhere; }
+.case-card h2 { font-size: 18px; }
+.case-card dl { display: grid; gap: 12px; }
+.case-card dd { margin: 0 0 16px; white-space: pre-wrap; }
+.case-card dt, .case-status { font-weight: 700; }
+.case-card form { display: grid; gap: 18px; }
+.case-card textarea { min-height: 110px; }
+.case-card input, .case-card select, .case-card textarea, .case-filters select { max-width: 100%; }
+.review-event { padding-block: 16px; border-bottom: 1px solid var(--line, #dfe3e9); white-space: pre-wrap; }
+.case-id, .report-success { overflow-wrap: anywhere; }
+@media(max-width: 600px) { .case-card { padding: 18px; } .cases-page h1 { font-size: 27px; } .case-navigation a, .case-more { min-height: 44px; display: inline-flex; align-items: center; } }

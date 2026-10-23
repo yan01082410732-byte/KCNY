@@ -1,14 +1,21 @@
 import { redirect } from "next/navigation";
 import { normalizeLanguage } from "@/lib/auth";
-import { createClient } from "@/lib/supabase/server";
+import { reportingContext } from "@/lib/report-server";
+import { communityPage, olderThanFilter, parseCommunityCursor } from "@/lib/community-pagination";
+import { REPORT_FIELDS, REPORT_PAGE_SIZE, type ReportCase } from "@/lib/reporting";
+import { ReportList, ReportsUnavailable } from "@/components/ReportCases";
 
 export const dynamic = "force-dynamic";
 
-export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
-  const { lang } = await searchParams;
-  const language = normalizeLanguage(lang);
-  const supabase = await createClient();
-  const { data } = await supabase?.auth.getClaims() ?? {};
-  if (!data?.claims?.sub) redirect(`/auth/login?lang=${language}&returnTo=/reports`);
-  return <main className="auth-page"><section className="auth-card" role="status"><h1>{language === "KR" ? "내 신고" : "我的举报"}</h1><p>{language === "KR" ? "신고 저장 및 상태 조회 기능은 아직 준비 중입니다. 제출 내역을 표시할 수 없습니다." : "举报持久化与状态查询尚未开通，因此暂时无法显示提交记录。"}</p><a href={`/?lang=${language}`}>{language === "KR" ? "커뮤니티로 돌아가기" : "返回社区"}</a></section></main>;
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ lang?: string; before?: string }> }) {
+  const params = await searchParams; const language = normalizeLanguage(params.lang);
+  const ctx = await reportingContext();
+  if (!ctx.userId) redirect(`/auth/login?lang=${language}&returnTo=/reports`);
+  if (!ctx.enabled || !ctx.supabase) return <ReportsUnavailable language={language} />;
+  const cursor = parseCommunityCursor(params.before);
+  let query = ctx.supabase.from("reports").select(REPORT_FIELDS).eq("reporter_id", ctx.userId).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(REPORT_PAGE_SIZE + 1);
+  if (cursor) query = query.or(olderThanFilter(cursor));
+  const { data, error } = await query;
+  const page = communityPage((data ?? []) as ReportCase[], REPORT_PAGE_SIZE);
+  return <ReportList language={language} reports={page.items} error={Boolean(error)} nextCursor={page.nextCursor} reviewer={ctx.reviewer} />;
 }
