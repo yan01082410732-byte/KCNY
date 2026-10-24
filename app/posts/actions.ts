@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { isSafePostId, validatePostInput } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
+import { mediaReadsAvailable } from "@/lib/post-media-policy";
 
 export async function createPost(formData: FormData) {
   const rawLanguage = formData.get("language");
@@ -37,6 +38,9 @@ export async function deletePost(formData: FormData) {
   const { data: profile } = await supabase.from("profiles").select("username").eq("id", userId).maybeSingle();
   const { data: deleted, error } = await supabase.from("posts").delete().eq("id", postId).eq("author_id", userId).select("id").maybeSingle();
   if (error || !deleted) redirect(`/posts/${postId}?lang=${language}&error=delete_failed`);
+  // The DB deletion trigger preserves object paths/owner independently of the deleted post.
+  // Best effort only; a failed Storage API call remains in the bounded retry queue.
+  if (mediaReadsAvailable(process.env)) await supabase.functions.invoke("kcny-post-media", { body: { operation: "cleanup" } }).catch(() => {});
   redirect(profile?.username ? `/u/${encodeURIComponent(profile.username)}?lang=${language}&deleted=1` : `/?lang=${language}`);
 }
 

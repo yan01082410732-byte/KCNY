@@ -1,10 +1,12 @@
 "use client";
+import { useState } from "react";
 
 import { updatePost } from "@/app/posts/actions";
 import { AuthSubmitButton } from "@/components/AuthSubmitButton";
 import { usePostDraft } from "@/components/usePostDraft";
 import type { Language } from "@/lib/auth";
 import { postDraftKey } from "@/lib/post-drafts";
+import { PostImageManager } from "@/components/PostImageControls";
 import {
   POST_CATEGORIES,
   isPostCategory,
@@ -25,12 +27,15 @@ export function PostEditor({
   language,
   viewerId,
   error,
+  mediaEnabled = false,
 }: {
   post: EditablePost;
   language: Language;
   viewerId: string;
   error?: string;
+  mediaEnabled?: boolean;
 }) {
+  const [mediaBusy, setMediaBusy] = useState(false);
   const { draft, setDraft } = usePostDraft(viewerId, { title: post.title, content: post.content, category: post.category, language: post.language }, post.id);
   const korean = language === "KR";
   const postLanguageOptions = korean
@@ -93,8 +98,9 @@ export function PostEditor({
             </select>
           </label>
           <input type="hidden" name="language" value={draft.language} />
-          <p className="field-help">{text.helper}</p>
-          <AuthSubmitButton idleText={text.save} pendingText={text.saving} />
+          <p className="field-help">{mediaEnabled ? korean ? "글을 저장하거나 이미지를 별도로 업로드·교체할 수 있습니다." : "可保存文字，或单独上传、替换图片。" : text.helper}</p>
+          {mediaEnabled && <PostImageManager postId={post.id} language={language} onBusyChange={setMediaBusy} />}
+          <fieldset className="post-save-control" disabled={mediaBusy}><AuthSubmitButton idleText={text.save} pendingText={text.saving} /></fieldset>
         </form>
         <a className="button secondary post-editor-cancel" href={`/posts/${encodeURIComponent(post.id)}?lang=${language}`}>{text.cancel}</a>
       </section>

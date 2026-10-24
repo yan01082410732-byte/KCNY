@@ -15,6 +15,7 @@ import { formatPostDate, postAvatarInitial, postCategoryLabel, postLanguageLabel
 import { postDraftKey } from "@/lib/post-drafts";
 import { postLikeErrorMessage } from "@/lib/post-likes";
 import { reportHref } from "@/lib/reporting";
+import { PostImage } from "@/components/PostImage";
 
 type Props = { post: PublicPost; commentThreads: CommentThread[]; commentCount: number; commentsUnavailable: boolean; likesUnavailable?: boolean; commentError?: string; postError?: string; likeError?: string; completedDraft?: "create" | "edit"; focusedCommentId?: string; nextCommentCursor?: string; currentCommentCursor?: string; language: Language; authenticated: boolean; currentUserId?: string; currentUsername?: string; currentDisplayName?: string; canEdit: boolean; canDelete: boolean; };
 
@@ -35,6 +36,7 @@ export function PostDetailClient({ post, commentThreads, commentCount, commentsU
         <div className="post-detail-author"><div className="avatar coral" aria-hidden="true">{postAvatarInitial(author)}</div><div><a href={`/u/${encodeURIComponent(author.username)}?lang=${activeLanguage}`}>{author.display_name || author.username}</a><p>@{author.username} · {formatPostDate(post.created_at, activeLanguage)}</p></div></div>
         <p className="post-language">{postCategoryLabel(post.category, activeLanguage)} · {postLanguageLabel(post.language, activeLanguage)}</p>
         <h1>{post.title}</h1><p className="post-detail-content">{post.content}</p>
+        <PostImage postId={post.id} language={activeLanguage} detail />
         <div className="post-detail-actions"><LikeButton postId={post.id} likeCount={post.likeCount} liked={post.likedByCurrentUser} language={activeLanguage} returnTo={commentPageHref(post.id, activeLanguage, currentCommentCursor)} authenticated={authenticated} unavailable={likesUnavailable} /><BookmarkButton postId={post.id} bookmarked={post.bookmarkedByCurrentUser} language={activeLanguage} returnTo={commentPageHref(post.id, activeLanguage, currentCommentCursor)} authenticated={authenticated} /><a className="report-link" href={reportHref("post", post.id, activeLanguage)}>{korean ? "게시글 신고" : "举报帖子"}</a></div>
         {(canEdit || canDelete) && <div className="post-owner-actions">{canEdit && <a className="button secondary" href={`/posts/${encodeURIComponent(post.id)}/edit?lang=${activeLanguage}`}>{korean ? "게시글 수정" : "编辑帖子"}</a>}{canDelete && <DeletePostControl postId={post.id} language={activeLanguage} korean={korean} />}</div>}
       </article>

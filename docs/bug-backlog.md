@@ -157,3 +157,19 @@ The existing media/Storage and notification-type preference gates remain separat
 | REPORT-020-04 | Non-critical | Backup/log/export lifetimes and disposal need an operational decision before real retention clearing; logical row redaction is not immediate physical erasure. No automated purge or real record deletion enabled. |
 
 TASK 019 isolated acceptance remains accepted; these are Production activation/operations gates, not a reason to restart form development. Next feature area remains image upload, separately scoped.
+
+# Single-image posts 2026-10-25 (TASK 021)
+
+One module retrospective, no unrelated audit. Implemented and accepted only in the isolated test project; Production media remains disabled and reporting unchanged.
+
+| ID | Class / status | Finding |
+|---|---|---|
+| MEDIA-021-01 | Core development blocker — FIXED | ImageMagick listLength=1 also rejected internal working images. Bounded value 8 plus independent animation/pixel/memory checks; actual format tests pass. |
+| MEDIA-021-02 | Core development blocker — FIXED | PL/pgSQL read aliases collided with local records (42702). Separate immutable follow-up migration fixes aliases; real UI refresh/list/detail passes. |
+| MEDIA-021-03 | Lifecycle safeguards delivered | Stable post identity and bounded expired/orphan sweep prevent path loss/starvation. CAS, actual delete race and protected-object cleanup tests pass. |
+| MEDIA-021-04 | Non-critical acceptance | Actual iPad/Safari hardware PENDING. Chromium 390px/820px viewport operations pass; not represented as real device acceptance. |
+| MEDIA-021-05 | Non-critical scale/operations | Cold WASM fetch/compile and larger-volume/egress performance not broadly benchmarked. Manual bounded cleanup exists, no automatic/global maintenance endpoint. Decide production budget/duty separately. |
+| MEDIA-021-06 | Non-critical UX follow-up | Review native file-picker filename clearing/same-file reselection after a successful upload. Preview/state is cleared; reload is available. Do not confuse the native displayed filename with an unsaved attachment. |
+| MEDIA-021-07 | Test harness — FIXED | Main run retained 22/24: exact error locator and explicit navigation timeout corrected; both scenarios passed targeted recheck. Original failures remain separate. |
+
+No unresolved critical issue observed in the exercised module. See POST_IMAGES_IMPLEMENTATION_021.md, POST_IMAGES_CLEANUP_021.md and separate Production Change Request. Temporary Storage failure shim removed; original bundle restored, synthetic objects cleaned. No changes to reporting retention, AI or historical UNKNOWN events.

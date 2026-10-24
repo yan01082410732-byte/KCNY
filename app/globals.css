@@ -159,4 +159,18 @@ header { height:76px; background:rgba(251,250,247,.93); border-bottom:1px solid 
 .case-card input, .case-card select, .case-card textarea, .case-filters select { max-width: 100%; }
 .review-event { padding-block: 16px; border-bottom: 1px solid var(--line, #dfe3e9); white-space: pre-wrap; }
 .case-id, .report-success { overflow-wrap: anywhere; }
+.post-image { margin:16px 0; overflow:hidden; border-radius:12px; background:#f0f3f6; }
+.post-image img { display:block; width:100%; height:auto; max-height:220px; object-fit:cover; }
+.post-image-detail img { max-height:650px; object-fit:contain; }
+.post-image-picker { min-width:0; border:1px solid var(--line); border-radius:12px; padding:14px; margin:16px 0; }
+.post-image-picker input[type=file] { width:100%; min-width:0; max-width:100%; padding:10px 0; }
+.post-image-picker label { display:block; margin-top:6px; }
+.post-image-preview { display:block; width:auto; max-width:100%; max-height:240px; border-radius:10px; margin:12px auto; }
+.post-image-buttons { display:flex; gap:10px; flex-wrap:wrap; }
+.post-image-buttons button,.post-image-picker button,.post-image-error button { min-height:44px; white-space:normal; }
+.post-image-management { min-width:0; margin:20px 0; }
+.post-save-control { border:0; padding:0; margin:0; min-width:0; }
+.post-editor-fields { border:0; padding:0; margin:0; min-width:0; display:grid; gap:16px; }
+.post-image-error { margin:12px 0; color:var(--muted); font-size:13px; }
+@media(max-width:600px) { .post-image-buttons { flex-direction:column; }.post-image-buttons button { width:100%; }.post-image-picker { padding:12px; } }
 @media(max-width: 600px) { .case-card { padding: 18px; } .cases-page h1 { font-size: 27px; } .case-navigation a, .case-more { min-height: 44px; display: inline-flex; align-items: center; } }

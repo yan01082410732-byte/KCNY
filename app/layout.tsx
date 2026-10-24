@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import "./globals.css";
 import { htmlLanguage, normalizeLanguage } from "@/lib/auth";
+import { PostMediaProvider } from "@/components/PostImage";
+import { mediaReadsAvailable } from "@/lib/post-media-policy";
 
 export const metadata: Metadata = {
   title: "KCNY | China × Korea Community",
@@ -13,7 +15,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const language = normalizeLanguage(requestHeaders.get("x-kcny-language"));
   return (
     <html lang={htmlLanguage(language)}>
-      <body>{children}</body>
+      <body><PostMediaProvider available={mediaReadsAvailable(process.env)}>{children}</PostMediaProvider></body>
     </html>
   );
 }

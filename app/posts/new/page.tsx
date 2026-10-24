@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { PostComposer } from "@/components/PostComposer";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { mediaWritesAvailable } from "@/lib/post-media-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -15,5 +16,5 @@ export default async function NewPostPage({ searchParams }: { searchParams: Prom
   if (!userId) redirect(`/auth/login?lang=${fallbackLanguage}&returnTo=/posts/new`);
   const { data: profile } = await supabase.from("profiles").select("preferred_language").eq("id", userId).maybeSingle();
   const language = isLanguage(lang) ? lang : (isLanguage(profile?.preferred_language) ? profile.preferred_language : "CN");
-  return <PostComposer language={language} viewerId={userId} error={error} />;
+  return <PostComposer language={language} viewerId={userId} error={error} mediaEnabled={mediaWritesAvailable(process.env)} />;
 }

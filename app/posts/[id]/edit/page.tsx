@@ -3,6 +3,7 @@ import { PostEditor } from "@/components/PostEditor";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { isSafePostId, isPostCategory } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
+import { mediaWritesAvailable } from "@/lib/post-media-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -44,5 +45,5 @@ export default async function EditPostPage({
     notFound();
   }
 
-  return <PostEditor post={post} language={isLanguage(lang) ? lang : post.language} viewerId={userId} error={editError} />;
+  return <PostEditor post={post} language={isLanguage(lang) ? lang : post.language} viewerId={userId} error={editError} mediaEnabled={mediaWritesAvailable(process.env)} />;
 }
