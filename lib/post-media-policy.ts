@@ -1,9 +1,14 @@
 export const MEDIA_TEST_URL = "https://kirvcbkbkvotnsqnbcyf.supabase.co";
+export const MEDIA_PRODUCTION_URL = "https://czcyarmramlpmilfhpqo.supabase.co";
 export const MEDIA_MAX_BYTES = 5 * 1024 * 1024;
 export const MEDIA_MAX_PIXELS = 4 * 1024 * 1024;
 export const MEDIA_MIMES = ["image/jpeg", "image/png", "image/webp"] as const;
 export function mediaReadsAvailable(env: Record<string, string | undefined>) {
-  return env.NEXT_PUBLIC_SUPABASE_URL === MEDIA_TEST_URL && env.VERCEL_ENV !== "production";
+  const url = env.NEXT_PUBLIC_SUPABASE_URL ?? env.SUPABASE_URL;
+  const deployment = env.VERCEL_ENV ?? env.KCNY_MEDIA_DEPLOYMENT_ENV ?? "development";
+  if (env.VERCEL_ENV && env.KCNY_MEDIA_DEPLOYMENT_ENV && env.VERCEL_ENV !== env.KCNY_MEDIA_DEPLOYMENT_ENV) return false;
+  if (url === MEDIA_TEST_URL) return ["development", "preview"].includes(deployment) && (env.KCNY_MEDIA_ENVIRONMENT ?? "test") === "test";
+  return url === MEDIA_PRODUCTION_URL && deployment === "production" && env.KCNY_MEDIA_DEPLOYMENT_ENV === "production" && env.KCNY_MEDIA_ENVIRONMENT === "production";
 }
 export function mediaWritesAvailable(env: Record<string, string | undefined>) {
   return mediaReadsAvailable(env) && env.KCNY_POST_IMAGES_ENABLED === "true";
@@ -56,5 +61,10 @@ export function mediaErrorMessage(code: string, language: "CN" | "KR") {
   if (code === "authentication_required") return kr ? "로그인이 만료되었습니다. 다시 로그인하세요. 글은 보관됩니다." : "登录已失效，请重新登录。文字草稿仍保留。";
   if (code === "media_disabled") return kr ? "이미지 업로드가 현재 꺼져 있습니다. 일반 텍스트는 계속 사용할 수 있습니다." : "图片上传当前关闭，纯文字功能仍可使用。";
   if (code === "rate_limited") return kr ? "요청이 많습니다. 잠시 후 다시 시도하세요." : "请求较多，请稍后重试。";
+  if (code === "outcome_unknown") return kr ? "저장 결과를 아직 확인하지 못했습니다. 입력은 유지됩니다. 잠시 후 같은 요청으로 다시 확인하세요." : "暂时无法确认保存结果，输入已保留。请稍后使用同一请求重试核对。";
   return kr ? "처리하지 못했습니다. 글과 기존 이미지는 유지됩니다. 다시 시도하세요." : "处理失败，文字和原有图片已保留，请重试。";
+}
+export function mediaSavedMessage(pending: boolean, language: "CN" | "KR") {
+  return language === "KR" ? pending ? "이미지 변경은 저장되었습니다. 이전 파일 정리는 대기 중이며 다시 시도할 수 있습니다." : "이미지 변경을 저장했습니다."
+    : pending ? "图片变更已保存；旧文件清理待重试，不影响本次保存。" : "图片变更已保存。";
 }

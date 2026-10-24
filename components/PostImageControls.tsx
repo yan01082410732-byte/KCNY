@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { Language } from "@/lib/auth";
-import { mediaErrorMessage, mediaFileError } from "@/lib/post-media-policy";
+import { mediaErrorMessage, mediaFileError, mediaSavedMessage } from "@/lib/post-media-policy";
 import { invalidatePostImage, mediaFailureCode, requestMedia, uploadPostImage } from "@/lib/post-media-client";
 import { PostImage } from "@/components/PostImage";
 
@@ -27,7 +27,7 @@ export function ImageSelection({ language, file, onChange, disabled }: { languag
 export function PostImageManager({ postId, language, onBusyChange }: { postId: string; language: Language; onBusyChange: (busy: boolean) => void }) {
   const [file, setFile] = useState<File | null>(null), [status, setStatus] = useState<{ version: number; imageId: string | null } | null>(null);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [failed, setFailed] = useState(false);
-  const requestId = useRef(""), lock = useRef(false);
+  const requestId = useRef(""), removalId = useRef(""), lock = useRef(false);
   useEffect(() => { let cancelled = false; requestMedia({ operation: "status", postId }).then(data => { if (!cancelled) setStatus(data); }).catch(() => { if (!cancelled) { setFailed(true); setMessage(mediaErrorMessage("network_failed", language)); } }); return () => { cancelled = true; }; }, [postId, language]);
   async function act(operation: "upload" | "remove" | "cleanup") {
     if (lock.current) return; lock.current = true; setBusy(true); onBusyChange(true); setFailed(false); setMessage("");
@@ -38,10 +38,10 @@ export function PostImageManager({ postId, language, onBusyChange }: { postId: s
         if (result.failed) throw Error("cleanup_failed");
         setMessage(language === "KR" ? "정리 대기 항목을 확인했습니다. 만료 전 원본은 비공개로 보관됩니다." : "已检查待清理对象；未过期原件仍私有保留。");
       } else {
-        const result = operation === "remove" ? await requestMedia({ operation: "remove", postId, requestId: crypto.randomUUID(), expectedVersion: current.version }) : file ? await uploadPostImage(postId, file, current.version, requestId.current || (requestId.current = crypto.randomUUID()), stage => setMessage(stage === "uploading" ? language === "KR" ? "업로드 중…" : "正在上传…" : language === "KR" ? "서버에서 검증 중…" : "服务端正在校验…")) : null;
+        const result = operation === "remove" ? await requestMedia({ operation: "remove", postId, requestId: removalId.current || (removalId.current = crypto.randomUUID()), expectedVersion: current.version }) : file ? await uploadPostImage(postId, file, current.version, requestId.current || (requestId.current = crypto.randomUUID()), stage => setMessage(stage === "uploading" ? language === "KR" ? "업로드 중…" : "正在上传…" : language === "KR" ? "서버에서 검증 중…" : "服务端正在校验…")) : null;
         if (!result) return;
-        setStatus(result); setFile(null); requestId.current = ""; invalidatePostImage(postId);
-        setMessage(language === "KR" ? "이미지 변경을 저장했습니다." : "图片变更已保存。");
+        setStatus(result); setFile(null); requestId.current = ""; removalId.current = ""; invalidatePostImage(postId);
+        setMessage(mediaSavedMessage(result.cleanup?.state === "pending", language));
       }
     } catch (error) {
       const code = mediaFailureCode(error); setFailed(true); setMessage(mediaErrorMessage(code, language));

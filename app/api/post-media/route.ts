@@ -30,8 +30,8 @@ export async function POST(request: Request) {
   const bytes = new Uint8Array(size); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
   let body;
   try { body = JSON.parse(new TextDecoder().decode(bytes) || "null"); } catch { return Response.json({ error: "invalid_request" }, { status: 400, headers }); }
-  if (!body || typeof body !== "object" || Array.isArray(body) || !["create","save","reserve","finalize","status","remove","cleanup"].includes(body.operation)) return Response.json({ error: "invalid_request" }, { status: 400, headers });
-  if (!["status","cleanup"].includes(body.operation) && !mediaWritesAvailable(process.env)) return Response.json({ error: "media_disabled" }, { status: 403, headers });
+  if (!body || typeof body !== "object" || Array.isArray(body) || !["create","save","reserve","finalize","status","remove","cleanup","outcome"].includes(body.operation)) return Response.json({ error: "invalid_request" }, { status: 400, headers });
+  if (!["status","cleanup","outcome"].includes(body.operation) && !mediaWritesAvailable(process.env)) return Response.json({ error: "media_disabled" }, { status: 403, headers });
   const client = await createClient();
   const user = await client?.auth.getUser();
   if (!user?.data.user) return Response.json({ error: "authentication_required" }, { status: 401, headers });

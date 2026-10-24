@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { initializeImageMagick } from "@imagemagick/magick-wasm";
 import { sanitizePostImage } from "../../../lib/media-codec.ts";
-import { MEDIA_TEST_URL, MEDIA_MAX_BYTES, mediaFileError, mediaUuid } from "../../../lib/post-media-policy.ts";
+import { mediaReadsAvailable, MEDIA_MAX_BYTES, mediaFileError, mediaUuid } from "../../../lib/post-media-policy.ts";
+import { commitMedia, MediaOutcomeUnknown } from "../../../lib/media-commit.ts";
 
 const url = Deno.env.get("SUPABASE_URL") ?? "";
 const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
@@ -18,10 +19,10 @@ async function initializeCodec() {
   await codec;
 }
 async function digest(bytes: Uint8Array) { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map(x => x.toString(16).padStart(2, "0")).join(""); }
-class Failure extends Error { constructor(public code: string, public status = 400) { super(code); } }
+class Failure extends Error { constructor(public code: string, public status = 400, public uncertain = false) { super(code); } }
 async function service(operation: string, actor: string | null, request: unknown) {
   const { data, error } = await admin.rpc("media_service", { p_operation: operation, p_actor: actor, p_request: request });
-  if (error) throw new Failure(/^[a-z_]+$/.test(error.message) ? error.message : "media_request_failed", /^PT\d{3}$/.test(error.code) ? Number(error.code.slice(2)) : 500);
+  if (error) throw new Failure(/^[a-z_]+$/.test(error.message) ? error.message : "media_request_failed", /^PT\d{3}$/.test(error.code) ? Number(error.code.slice(2)) : 500, !/^[0-9A-Z]{5}$/.test(error.code ?? ""));
   return data;
 }
 async function cleanup(actor: string) {
@@ -39,7 +40,7 @@ async function cleanup(actor: string) {
 }
 export async function handler(req: Request) {
   try {
-    if (url !== MEDIA_TEST_URL) throw new Failure("media_disabled", 403);
+    if (!mediaReadsAvailable({ SUPABASE_URL: url, KCNY_MEDIA_ENVIRONMENT: Deno.env.get("KCNY_MEDIA_ENVIRONMENT"), KCNY_MEDIA_DEPLOYMENT_ENV: Deno.env.get("KCNY_MEDIA_DEPLOYMENT_ENV") })) throw new Failure("media_disabled", 403);
     if (req.method !== "POST") throw new Failure("method_not_allowed", 405);
     if (Number(req.headers.get("content-length")) > 32768) throw new Failure("invalid_request", 413);
     const reader = req.body?.getReader(); let size = 0; const chunks: Uint8Array[] = [];
@@ -71,6 +72,22 @@ export async function handler(req: Request) {
       return Response.json({ images: result }, { headers: { "Cache-Control": "private, no-store" } });
     }
     if (!actor) throw new Failure("authentication_required", 401);
+    if (input.operation === "outcome") {
+      if (!["finalize", "remove"].includes(input.kind) || (input.kind === "finalize" ? !mediaUuid(input.uploadId) : !mediaUuid(input.requestId))) throw new Failure("invalid_request");
+      const { data, error } = await admin.rpc("media_operation_outcome", { p_actor: actor, p_request: input });
+      if (error) throw new Failure(error.code === "PT404" ? "upload_not_found" : "outcome_unknown", error.code === "PT404" ? 404 : 503);
+      return Response.json(data, { headers: { "Cache-Control": "private, no-store" } });
+    }
+    const afterCommit = (operation: "finish" | "remove", request: Record<string, unknown>) => commitMedia({
+      commit: () => service(operation, actor, request),
+      uncertain: error => !(error instanceof Failure) || error.uncertain,
+      reconcile: async () => {
+        const { data, error } = await admin.rpc("media_operation_outcome", { p_actor: actor, p_request: { ...request, kind: operation === "finish" ? "finalize" : "remove" } });
+        if (error) throw new MediaOutcomeUnknown();
+        return data;
+      },
+      cleanup: () => cleanup(actor),
+    });
     if (input.operation === "create" || input.operation === "save") {
       if (!mediaUuid(input.requestId)) throw new Failure("invalid_request");
       if (input.operation === "save") {
@@ -100,13 +117,13 @@ export async function handler(req: Request) {
         if (error) throw new Failure("upload_failed", 503);
         return Response.json({ uploadId: upload.id, path: data.path, token: data.token });
       }
-      const result = await service(input.operation, actor, input);
-      if (input.operation === "remove") await cleanup(actor);
+      const result = input.operation === "remove" ? await afterCommit("remove", input) : await service(input.operation, actor, input);
       return Response.json(result);
     }
     if (input.operation !== "finalize" || !mediaUuid(input.uploadId)) throw new Failure("invalid_request");
     const upload = await service("begin", actor, { uploadId: input.uploadId });
     if (upload.state === "ready") return Response.json({ imageId: upload.id, version: upload.version });
+    let validated: { bytes: number; width: number; height: number; sha256: string };
     try {
       const { data: raw, error } = await admin.storage.from("kcny-post-staging").download(upload.stage_path);
       if (error || !raw) throw new Failure("upload_missing", 409);
@@ -119,14 +136,16 @@ export async function handler(req: Request) {
         const { data: existing } = await admin.storage.from("kcny-post-images").download(upload.final_path);
         if (!existing || await digest(new Uint8Array(await existing.arrayBuffer())) !== hash) throw new Failure("image_conflict", 409);
       }
-      const result = await service("finish", actor, { uploadId: upload.id, lease: upload.lease, bytes: image.bytes.length, width: image.width, height: image.height, sha256: hash });
-      await cleanup(actor);
-      return Response.json(result);
+      validated = { bytes: image.bytes.length, width: image.width, height: image.height, sha256: hash };
     } catch (error) {
       await service("reject", actor, { uploadId: upload.id, lease: upload.lease }).catch(() => {});
       throw error;
     }
+    // Past this boundary, finish may have committed even if its response is lost.
+    // Never reject a possibly/definitely committed upload because cleanup failed.
+    return Response.json(await afterCommit("finish", { uploadId: upload.id, lease: upload.lease, ...validated }));
   } catch (error) {
+    if (error instanceof MediaOutcomeUnknown) return Response.json({ error: "outcome_unknown" }, { status: 503, headers: { "Cache-Control": "no-store" } });
     const allowed = error instanceof Failure ? error.code : error instanceof Error && /^(file_|image_)[a-z_]+$/.test(error.message) ? error.message : "image_processing_failed";
     return Response.json({ error: allowed }, { status: error instanceof Failure ? error.status : 400, headers: { "Cache-Control": "no-store" } });
   }

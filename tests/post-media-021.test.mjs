@@ -8,11 +8,12 @@ import {MEDIA_MAX_BYTES,mediaReadsAvailable,mediaWritesAvailable,mediaFileError,
 const require=createRequire(import.meta.url),sharp=require('sharp');
 await initializeImageMagick(readFileSync(require.resolve('@imagemagick/magick-wasm/magick.wasm')));
 const env={NEXT_PUBLIC_SUPABASE_URL:'https://kirvcbkbkvotnsqnbcyf.supabase.co'};
-test('media is default off, exact test project only, production never enabled',()=>{
+test('media is default off; production requires its complete explicit configuration',()=>{
  assert.equal(mediaWritesAvailable(env),false);assert.equal(mediaWritesAvailable({...env,KCNY_POST_IMAGES_ENABLED:'true'}),true);
  assert.equal(mediaWritesAvailable({...env,VERCEL_ENV:'production',KCNY_POST_IMAGES_ENABLED:'true'}),false);
  assert.equal(mediaWritesAvailable({NEXT_PUBLIC_SUPABASE_URL:'https://czcyarmramlpmilfhpqo.supabase.co',KCNY_POST_IMAGES_ENABLED:'true'}),false);
  assert.equal(mediaReadsAvailable(env),true);assert.equal(mediaReadsAvailable({}),false);
+ assert.equal(mediaWritesAvailable({NEXT_PUBLIC_SUPABASE_URL:'https://czcyarmramlpmilfhpqo.supabase.co',VERCEL_ENV:'production',KCNY_MEDIA_DEPLOYMENT_ENV:'production',KCNY_MEDIA_ENVIRONMENT:'production',KCNY_POST_IMAGES_ENABLED:'true'}),true);
 });
 test('file limits use exactly 5 MiB, reject unsupported formats and empty input',()=>{
  for(const mime of ['image/jpeg','image/png','image/webp'])assert.equal(mediaFileError(MEDIA_MAX_BYTES,mime),null);

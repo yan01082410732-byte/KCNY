@@ -16,18 +16,32 @@ Post deletion uses a BEFORE DELETE trigger to retain the owner and paths and que
 
 For inactive owners, a separately authorized operator may work through the provider's authenticated management interface. Verify project identity, exact module bucket/path and case batch first. This is management authority, NOT evidence that ordinary clients have privileged rights.
 
-Read due owners with a bounded management SELECT:
+TASK 022 replaces the pending-only discovery query. Use the bounded worker-only
+candidate RPC through the already authorized management channel. It includes
+expired unqueued uploads (excluding live processing leases), expired deleting
+leases, unreferenced ready images and observed late objects at exact known paths.
+No user needs to sign back in. Example management transaction (not a client API):
 
 ```sql
-select owner_id, count(*) as due_jobs
-from media_private.cleanup
-where status = 'pending' and not_before <= now()
-group by owner_id order by owner_id limit 10;
+begin;
+set local request.jwt.claims = '{"role":"service_role"}';
+select * from public.media_maintenance_candidates(null,20);
+commit;
 ```
 
 In an authorized management transaction, set only that transaction's RPC role claim to service_role, call `public.media_queue_orphans(verified_owner_uuid)` and `public.media_service('cleanup_claim', verified_owner_uuid, '{}'::jsonb)`. Do not change persistent roles, RLS or Auth. The result is an exact batch of at most 20 fixed-bucket paths and leases, not a bucket-wide delete instruction. Inspect its correspondence to the approved owner/target. Delete those objects through the official Storage UI/API (the UI itself uses Storage API), then acknowledge each exact task ID/lease with `cleanup_ack` and the true success boolean in an authorized transaction. A failure stays pending; do not falsify success or manually erase queue records. Claim again if a lease expired. Never reuse this administrative path as a normal-user permission test, export a service key, or put it in the browser.
 
 Current round exercised owner-session cleanup, including a persisted injected Storage failure and real retry. Operator fallback is documented, not separately presented as executed production maintenance. Future automation/global maintenance endpoints require a separate narrowly scoped decision; no whole-site super-admin role was introduced.
+
+TASK 022 also supplies `lib/media-maintenance.ts`, a bounded trusted-runtime helper
+using an existing server client, not an HTTP route or a request for key export.
+Repeat keyset pages (at most 20 owners and 20 claims per owner), then restart at
+NULL on a later sweep. Exact observed late objects reopen completed jobs; signed
+upload safety still uses at least three hours after allocation. Actual deletion
+uses Storage API. Acks that fail leave durable deleting leases for subsequent
+recovery. Discovery/claim/ack failures are not silently called successful cleanup.
+Assign an accountable operator and review queue age/failures before production;
+there is still no installed automatic schedule.
 
 ## Acceptance controls and recovery
 

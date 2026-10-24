@@ -173,3 +173,16 @@ One module retrospective, no unrelated audit. Implemented and accepted only in t
 | MEDIA-021-07 | Test harness — FIXED | Main run retained 22/24: exact error locator and explicit navigation timeout corrected; both scenarios passed targeted recheck. Original failures remain separate. |
 
 No unresolved critical issue observed in the exercised module. See POST_IMAGES_IMPLEMENTATION_021.md, POST_IMAGES_CLEANUP_021.md and separate Production Change Request. Temporary Storage failure shim removed; original bundle restored, synthetic objects cleaned. No changes to reporting retention, AI or historical UNKNOWN events.
+
+# Targeted media consistency 2026-10-25 (TASK 022)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| MEDIA-022-01 | Core consistency — FIXED | Acknowledged finish/remove could be reported failed when subsequent cleanup RPC failed. Commit result, cleanup warning and unknown reconciliation are now separate; six real fault combinations have passing evidence, retaining initial setup failure and recheck. |
+| MEDIA-022-02 | Cleanup omission — FIXED | Controlled delayed PUT after a completed cleanup left an object. Follow-up migration discovers exact eligible Storage paths and reopens done jobs; current references/live leases remain protected. Time advancement is explicitly distinguished from real capability expiration. |
+| MEDIA-022-03 | Error semantics — FIXED | Foreign outcome lookup was denied but mislabelled 503 unknown; it now returns 404, with genuine ordinary-user retest. |
+| MEDIA-022-04 | Acceptance limits / deferred | Real iPad/Safari and naturally expired correctly signed JWT remain pending. Forged expired claims and Chromium viewport results are not substitutes. Existing native picker/volume benchmarks remain deferred, not reopened. |
+| MEDIA-022-05 | Production authorization / operations gate | Production allowlist and declarative auth configuration are prepared, not deployed. Separate approval, cleanup operator/budget and real-device disposition remain; no cron/resource/key export or reporting enablement. |
+
+One targeted retrospective only. See POST_IMAGES_TARGETED_ACCEPTANCE_022.md and
+POST_IMAGES_RELEASE_CHECKLIST_022.md. No new feature scope or unrelated repairs.
