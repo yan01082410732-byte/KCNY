@@ -31,11 +31,13 @@ test("profile mutation is claim-scoped and confirms an updated row", () => {
   assert.match(action, /if \(error \|\| !data\)/);
   assert.doesNotMatch(action, /formData\.get\("userId"\)/);
 });
-test("settings preserves edits and has no cosmetic notification toggle", () => {
+test("settings preserves profile edits and uses persisted notification preferences", () => {
   const client = read("components/ProfileSettingsClient.tsx");
   assert.match(client, /sessionStorage\.setItem\(draftKey\(profile\.username\)/);
   assert.match(client, /sessionStorage\.removeItem\(draftKey\(profile\.username\)/);
   assert.match(client, /role="alert"/);
-  assert.match(client, /알림 유형별 설정은 아직 지원되지 않습니다/);
+  assert.match(client, /<NotificationPreferences language=\{language\}/);
+  assert.match(read("components/NotificationPreferences.tsx"), /api\/notification-preferences/);
+  assert.match(read("app/api/notification-preferences/route.ts"), /rpc\("set_notification_preferences"/);
   assert.doesNotMatch(client, /type="checkbox"/);
 });

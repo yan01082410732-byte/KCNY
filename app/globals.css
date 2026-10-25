@@ -129,6 +129,10 @@ header { height:76px; background:rgba(251,250,247,.93); border-bottom:1px solid 
 .settings-grid .auth-card { width:100%; min-width:0; }
 .settings-grid h2 { font-size:18px; margin:16px 0; }
 .settings-aside { display:grid; gap:18px; }
+.notification-preferences fieldset { border:0; padding:0; margin:0; display:grid; gap:4px; min-width:0; }
+.notification-preferences fieldset label { display:flex; align-items:center; gap:12px; min-height:44px; cursor:pointer; overflow-wrap:anywhere; }
+.notification-preferences input[type="checkbox"] { width:20px; height:20px; flex:0 0 20px; accent-color:var(--ink); }
+.notification-preferences button { min-height:44px; white-space:normal; }
 .settings-aside p { color:var(--muted); line-height:1.6; }
 .settings-aside a { display:inline-block; min-height:44px; padding:11px 0; }
 @media (max-width:680px) { .settings-grid { grid-template-columns:minmax(0,1fr); } }

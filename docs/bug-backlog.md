@@ -211,3 +211,16 @@ Historical rows above retain their original observation dates; the updates below
 | MEDIA-026-05 | Release gate, not a code defect | Production authority still needed for six migrations, Storage/Edge/Vault/Cron/application and conditional activation. Vercel fresh deployment/usage query403 needs legitimate team access. Last accepted020 deployment must be reverified before release. Reporting remainsOFF/OFF; no TASK B or paid upgrade. |
 
 One targeted retrospective complete. No confirmed unresolved security/data-loss/core-flow defect in exercised paths. See POST_IMAGES_ACCEPTANCE_026.md and POST_IMAGES_PRODUCTION_RELEASE_PLAN_026.md.
+
+# Notification preferences — 2026-10-25 (TASK 028)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| NOTIFY-028-01 | Feature delivered / test accepted | Four persisted owner-scoped switches filter future notification INSERTs at DB level. Missing row defaults ON; existing notifications/read/pagination unchanged. Production migration/application release need separate approval. |
+| NOTIFY-028-02 | Non-critical development-runtime issue | Follow OFF passes; subsequent ON fails in two development-browser batches with `frame.join is not a function` from internal RSC code. No subsequent follow request observed. Same-source optimized local batch passes 15/15 with zero pageerrors, including both follow states. Exact framework root cause remains unconfirmed; original failures retained, no speculative dependency changes. |
+| NOTIFY-028-03 | Explicit failure boundary | Lookup failure skips only that notification and logs sanitized SQLSTATE; main mutation survives (four-path transactional fault probe passed). No outbox/replay is included. Diagnostic ingestion through the unified logs query interface was not independently confirmed. |
+| NOTIFY-028-04 | Non-critical acceptance | Real iPad/Safari PENDING. Actual Chromium 390/820/1280px settings, CN/KR switching, reload and relogin pass; viewport simulation is not device acceptance. |
+| NOTIFY-028-05 | Test/ledger record | Initial SQL unit assertion matched a comment, corrected to inspect executable SQL. Live test migration payload is recorded as 20261025141820 while source filename remains 20261025141205; no historical repair/rename performed. |
+| MEDIA-028-01 | Prior fixture CLOSED | Exact MEDIA-026-04 fixture passed its safety gate and lease/reference checks; existing v2 Storage maintenance physically deleted1, already-absent0, ack1, failure0. Due tasks/expired leases0, other images preserved, writesOFF and schedulespaused. |
+
+One affected-boundary retrospective only. No confirmed new critical authorization/privacy/data-loss defect; no production, media-source, reporting activation, AI or shared coordination changes. See NOTIFICATION_PREFERENCES_IMPLEMENTATION_028.md and NOTIFICATION_PREFERENCES_PRODUCTION_CHANGE_REQUEST_028.md.

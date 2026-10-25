@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { AuthSubmitButton } from "@/components/AuthSubmitButton";
 import type { Language } from "@/lib/auth";
 import { updateProfile } from "@/app/settings/profile/actions";
+import { NotificationPreferences } from "@/components/NotificationPreferences";
 
 type Profile = { username: string; display_name: string | null; bio: string | null; preferred_language: Language };
 type Draft = { displayName: string; bio: string; preferredLanguage: Language };
@@ -45,9 +46,9 @@ export function ProfileSettingsClient({ profile, initialLanguage, notice, error 
   const language = initialLanguage;
   const korean = language === "KR";
   const copy = korean ? {
-    title: "계정 설정", profile: "공개 프로필", username: "사용자 이름", displayName: "표시 이름", bio: "소개", language: "선호 언어", save: "저장", saving: "저장 중…", saved: "프로필이 저장되었습니다.", restored: "이전 수정 내용을 복원했습니다.", empty: "자기소개는 비워 둘 수 있습니다.", limit: "최대 500자", error: "프로필을 저장하지 못했습니다. 내용을 확인하고 다시 시도해 주세요.", notifications: "알림", notificationInfo: "현재 앱 내 알림이 제공됩니다. 개별 알림이나 전체 알림을 읽음으로 표시할 수 있습니다. 알림 유형별 설정은 아직 지원되지 않습니다.", notificationLink: "알림 센터 열기", account: "계정", accountInfo: "계정 정보와 로그인 보안은 기존 로그인 절차에서 관리됩니다.", viewProfile: "내 프로필 보기", fixedUsername: "사용자 이름 변경은 현재 지원되지 않습니다."
+    title: "계정 설정", profile: "공개 프로필", username: "사용자 이름", displayName: "표시 이름", bio: "소개", language: "선호 언어", save: "저장", saving: "저장 중…", saved: "프로필이 저장되었습니다.", restored: "이전 수정 내용을 복원했습니다.", empty: "자기소개는 비워 둘 수 있습니다.", limit: "최대 500자", error: "프로필을 저장하지 못했습니다. 내용을 확인하고 다시 시도해 주세요.", account: "계정", accountInfo: "계정 정보와 로그인 보안은 기존 로그인 절차에서 관리됩니다.", viewProfile: "내 프로필 보기", fixedUsername: "사용자 이름 변경은 현재 지원되지 않습니다."
   } : {
-    title: "账户设置", profile: "公开资料", username: "用户名", displayName: "显示名称", bio: "个人简介", language: "首选语言", save: "保存资料", saving: "正在保存…", saved: "资料已保存。", restored: "已恢复上次未保存的修改。", empty: "个人简介可以留空。", limit: "最多500字", error: "暂时无法保存资料，请检查内容后重试。", notifications: "通知", notificationInfo: "目前支持站内通知，可将单条或全部通知标记为已读。暂不支持按通知类型设置开关。", notificationLink: "打开通知中心", account: "账户", accountInfo: "账户信息与登录安全沿用现有登录流程管理。", viewProfile: "查看我的主页", fixedUsername: "暂不支持修改用户名。"
+    title: "账户设置", profile: "公开资料", username: "用户名", displayName: "显示名称", bio: "个人简介", language: "首选语言", save: "保存资料", saving: "正在保存…", saved: "资料已保存。", restored: "已恢复上次未保存的修改。", empty: "个人简介可以留空。", limit: "最多500字", error: "暂时无法保存资料，请检查内容后重试。", account: "账户", accountInfo: "账户信息与登录安全沿用现有登录流程管理。", viewProfile: "查看我的主页", fixedUsername: "暂不支持修改用户名。"
   };
   return <main>
     <Header language={language} onLanguageChange={() => {}} languageHref={(next) => `/settings/profile?lang=${next}`} authenticated username={profile.username} displayName={profile.display_name ?? undefined} />
@@ -69,7 +70,7 @@ export function ProfileSettingsClient({ profile, initialLanguage, notice, error 
         </form>
       </section>
       <div className="settings-aside">
-        <section className="auth-card"><h2>{copy.notifications}</h2><p>{copy.notificationInfo}</p><a href={`/notifications?lang=${language}`}>{copy.notificationLink}</a></section>
+        <NotificationPreferences language={language} />
         <section className="auth-card"><h2>{copy.account}</h2><p>{copy.accountInfo}</p><a href={`/u/${encodeURIComponent(profile.username)}?lang=${language}`}>{copy.viewProfile}</a></section>
       </div>
     </div></section>
