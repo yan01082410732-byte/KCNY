@@ -186,3 +186,13 @@ No unresolved critical issue observed in the exercised module. See POST_IMAGES_I
 
 One targeted retrospective only. See POST_IMAGES_TARGETED_ACCEPTANCE_022.md and
 POST_IMAGES_RELEASE_CHECKLIST_022.md. No new feature scope or unrelated repairs.
+
+# Scheduled media maintenance 2026-10-25 (TASK 024)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| MEDIA-024-01 | Handoff correction — FIXED | Chat diff expanded a hunk-header word by one ASCII `n`. Exact single-byte reconstruction matches the supplied pasted hash; fresh Git export still matches the original A871500 hash. No source altered for hash matching. |
+| MEDIA-024-02 | Isolated operations implemented | Actual hourly pg_cron → pg_net → authenticated Edge → Storage cleanup executed with uploads off. Run/transport outcomes, durable cursors, global/job leases, backlog and failure history are separate. Test schedule is paused after acceptance, not installed in Production. |
+| MEDIA-024-03 | Acceptance pending | TASK 023 natural expiry remains gated by real 2026-10-25 17:33:15 KST eligibility. Credentials/time were not altered; originals remain in private encrypted state until the genuine probe and fixture cleanup. |
+| MEDIA-024-04 | Non-critical / deferred | iPad hardware acceptance and larger-volume runtime/egress assessment remain pending. No broad retest or infrastructure audit was added. |
+| MEDIA-024-05 | Production release gate | Test-only maintenance allowlist, production installation/credentials/operations and current billing headroom require separate approval. No production scheduler, resource purchase, upload or reporting enablement. |

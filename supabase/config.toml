@@ -388,6 +388,12 @@ verify_jwt = false
 entrypoint = "./functions/kcny-post-media/index.ts"
 import_map = "./functions/kcny-post-media/deno.json"
 
+# Dedicated Vault-backed HMAC + one-use dispatch authentication, not user JWT auth.
+[functions.kcny-media-maintenance]
+verify_jwt = false
+entrypoint = "./functions/kcny-media-maintenance/index.ts"
+import_map = "./functions/kcny-media-maintenance/deno.json"
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
