@@ -196,3 +196,18 @@ POST_IMAGES_RELEASE_CHECKLIST_022.md. No new feature scope or unrelated repairs.
 | MEDIA-024-03 | Acceptance pending | TASK 023 natural expiry remains gated by real 2026-10-25 17:33:15 KST eligibility. Credentials/time were not altered; originals remain in private encrypted state until the genuine probe and fixture cleanup. |
 | MEDIA-024-04 | Non-critical / deferred | iPad hardware acceptance and larger-volume runtime/egress assessment remain pending. No broad retest or infrastructure audit was added. |
 | MEDIA-024-05 | Production release gate | Test-only maintenance allowlist, production installation/credentials/operations and current billing headroom require separate approval. No production scheduler, resource purchase, upload or reporting enablement. |
+
+# TASK 025 closeout / TASK 026 production adaptation — 2026-10-25
+
+Historical rows above retain their original observation dates; the updates below supersede pending status without rewriting evidence.
+
+| ID | Class / status | Finding |
+|---|---|---|
+| MEDIA-025-01 | Acceptance CLOSED | Original credential had one real PUT, HTTP400; correlated Storage log explicitly reported exp-claim timestamp failure. Physical3 / already-absent3 / ack6, synthetic posts0, old encrypted capability state removed. Original proof and previous failures remain external; not rerun in026. |
+| MEDIA-026-01 | Adaptation delivered / not production-deployed | Shared exact fail-closed environment policy, v2 project/environment/source-bound HMAC, private production installer and separate per-run physical/absent/ack counters. Five historical migrations untouched; new sixth migration applied only to test. |
+| MEDIA-026-02 | Acceptance records retained | Full unit505/505, SQL worker-contract16/16; real batch15PASS/2FAIL retained. Configuration recheck and separate KR tablet1/1PASS, not rewritten as an all-green original batch. First KR control failure has insufficient detailed error to assert a product root cause. |
+| MEDIA-026-03 | Non-critical / deferred | Real iPad/Safari still PENDING. Initial image query latency/cold WASM and larger-volume/egress behavior remain scale follow-up; native file-picker polish unchanged. |
+| MEDIA-026-04 | Test fixture lifecycle / NOT DUE | One151-byte synthetic raw object intentionally remains until2026-10-25 22:16:13.951941KST safety gate, then recheck lease and use bounded maintenance. No due/failed/expired-lease tasks. Test writesOFF and both schedulespaused; no automatic follow-up promised. |
+| MEDIA-026-05 | Release gate, not a code defect | Production authority still needed for six migrations, Storage/Edge/Vault/Cron/application and conditional activation. Vercel fresh deployment/usage query403 needs legitimate team access. Last accepted020 deployment must be reverified before release. Reporting remainsOFF/OFF; no TASK B or paid upgrade. |
+
+One targeted retrospective complete. No confirmed unresolved security/data-loss/core-flow defect in exercised paths. See POST_IMAGES_ACCEPTANCE_026.md and POST_IMAGES_PRODUCTION_RELEASE_PLAN_026.md.

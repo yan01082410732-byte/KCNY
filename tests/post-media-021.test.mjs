@@ -7,7 +7,7 @@ import {sanitizePostImage} from '../lib/media-codec.ts';
 import {MEDIA_MAX_BYTES,mediaReadsAvailable,mediaWritesAvailable,mediaFileError,imageSignature,mediaErrorMessage,mediaUuid} from '../lib/post-media-policy.ts';
 const require=createRequire(import.meta.url),sharp=require('sharp');
 await initializeImageMagick(readFileSync(require.resolve('@imagemagick/magick-wasm/magick.wasm')));
-const env={NEXT_PUBLIC_SUPABASE_URL:'https://kirvcbkbkvotnsqnbcyf.supabase.co'};
+const env={NEXT_PUBLIC_SUPABASE_URL:'https://kirvcbkbkvotnsqnbcyf.supabase.co',KCNY_MEDIA_ENVIRONMENT:'test',KCNY_MEDIA_DEPLOYMENT_ENV:'development'};
 test('media is default off; production requires its complete explicit configuration',()=>{
  assert.equal(mediaWritesAvailable(env),false);assert.equal(mediaWritesAvailable({...env,KCNY_POST_IMAGES_ENABLED:'true'}),true);
  assert.equal(mediaWritesAvailable({...env,VERCEL_ENV:'production',KCNY_POST_IMAGES_ENABLED:'true'}),false);

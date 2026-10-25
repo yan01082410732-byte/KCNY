@@ -18,7 +18,7 @@ async function initializeCodec() {
   })().catch(error => { codec = undefined; throw error; });
   await codec;
 }
-async function digest(bytes: Uint8Array) { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))).map(x => x.toString(16).padStart(2, "0")).join(""); }
+async function digest(bytes: Uint8Array) { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array(bytes)))).map(x => x.toString(16).padStart(2, "0")).join(""); }
 class Failure extends Error { constructor(public code: string, public status = 400, public uncertain = false) { super(code); } }
 async function service(operation: string, actor: string | null, request: unknown) {
   const { data, error } = await admin.rpc("media_service", { p_operation: operation, p_actor: actor, p_request: request });

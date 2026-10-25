@@ -1,0 +1,169 @@
+{
+  "base": "6f392fc616c1d44b2fe437297f6277933ebdd8a9",
+  "canonicalEncoding": "UTF-8 LF / Git blob",
+  "sourceSetSHA256": "241F0EDC566C8F5D9AB2E7EE2CA83C36392ACAE75DCFD92D9EA9AECD9681939F",
+  "originalMigrations": [
+    {
+      "path": "supabase/migrations/20261024162328_post_image_lifecycle.sql",
+      "gitBlobSHA256": "B84541E23FAF0CF3D6A82A5FED567659F290F860B04655EDF6799060936D485E",
+      "workingSHA256": "434BFA8ED54CE0C47A814D2EF9EF35224F5AD6A0B0DBD55056106EB24E3F4F2C",
+      "historicalOriginalSHA256": "B84541E23FAF0CF3D6A82A5FED567659F290F860B04655EDF6799060936D485E",
+      "unchangedFromAcceptedBase": true
+    },
+    {
+      "path": "supabase/migrations/20261024164540_post_image_cleanup_guards.sql",
+      "gitBlobSHA256": "A387E8367ACF4D1542CA1BF704A941823CC23F4ED880AE1D7207369F6824A176",
+      "workingSHA256": "378D1F82BDE034ABA9EFB850CCC667989FDF9251DF33B8162A9C3B98E8F99113",
+      "historicalOriginalSHA256": "A387E8367ACF4D1542CA1BF704A941823CC23F4ED880AE1D7207369F6824A176",
+      "unchangedFromAcceptedBase": true
+    },
+    {
+      "path": "supabase/migrations/20261024182118_post_image_outcomes_maintenance_022.sql",
+      "gitBlobSHA256": "5EC587AE2A70A36D6C647885D7782E5C7C135A21203F213D5C2E83FE7AB8C6A0",
+      "workingSHA256": "C9AE47A4554DD3F6C97C16C137B4B2A17194AEA7F6FB77C1234CF347778EF8AE",
+      "historicalOriginalSHA256": "5EC587AE2A70A36D6C647885D7782E5C7C135A21203F213D5C2E83FE7AB8C6A0",
+      "unchangedFromAcceptedBase": true
+    },
+    {
+      "path": "supabase/migrations/20261025061601_post_media_scheduled_maintenance_024.sql",
+      "gitBlobSHA256": "C6F1EAE377CC1146D6AF0014C98AB1F37929084990D3A0800A44F63AE1BCB510",
+      "workingSHA256": "715CA13AA773F123DADFC9B8B548A050687431777006EE7841C93093CCFC5A29",
+      "historicalOriginalSHA256": "C6F1EAE377CC1146D6AF0014C98AB1F37929084990D3A0800A44F63AE1BCB510",
+      "unchangedFromAcceptedBase": true
+    },
+    {
+      "path": "supabase/migrations/20261025062825_post_media_maintenance_status_024.sql",
+      "gitBlobSHA256": "364199EB2BA80C4BE3A641F6C9C17B5F0FA70665ECF4721DC7A1421A424E82D6",
+      "workingSHA256": "5AE7A45874CE0050D3C233B7F5B2ADCE524AB203DF6B68CEF239827F68C9D7E7",
+      "historicalOriginalSHA256": "364199EB2BA80C4BE3A641F6C9C17B5F0FA70665ECF4721DC7A1421A424E82D6",
+      "unchangedFromAcceptedBase": true
+    }
+  ],
+  "files": [
+    {
+      "path": "lib/media-codec.ts",
+      "sha256": "87C02B366A83A8CBB843038A770F23E7D8CDA15D4561AFA84B8065E783362A39"
+    },
+    {
+      "path": "lib/media-commit.ts",
+      "sha256": "B4779CD406B15DBCBA9693E57AB328C6E9AC16F7ADE68EE52FFBBE45A1423594"
+    },
+    {
+      "path": "lib/media-maintenance.ts",
+      "sha256": "3AFAD7858B69F0A93F808DFA63F9B4123F1856AC42D2E157ADB16179FC108B49"
+    },
+    {
+      "path": "lib/post-media-policy.ts",
+      "sha256": "048811FC13B0BA5CD3ED394BFE401373B36AEA515B2B591D0052E782EC1AF78D"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "F87E75D00286B00824B3696E4F73903FB336D0D593D3DE0A79D8E9FBCE79DDC2"
+    },
+    {
+      "path": "package.json",
+      "sha256": "C1950E2AF130607240F0CB78E860072B31E767F2F61EB1A7F5833FC055E83C35"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "1948EF7ECE95DB7B22303CCAB85EBBAF83C46E712A6706BD2BEC8E25A8A6EDC9"
+    },
+    {
+      "path": "supabase/config.toml",
+      "sha256": "DAAAD26CE2DA0DB1BD3BF622D7D8ECCFFD5B77213A8E3F6728DF5B0B482BFCDB"
+    },
+    {
+      "path": "supabase/functions/kcny-media-maintenance/deno.json",
+      "sha256": "B189E9EE5882AF1ADB07D700A91B9E76010FE391E140652A29C80D0342B98FD2"
+    },
+    {
+      "path": "supabase/functions/kcny-media-maintenance/index.ts",
+      "sha256": "7BC43C73204494DB9ADDD566BC798BBBB36B9B8B34F841899E8F02B5DE1FD278"
+    },
+    {
+      "path": "supabase/functions/kcny-post-media/deno.json",
+      "sha256": "D2C38C79A9427CDAF0B5EEE99EF3933C7B8EDE5826AD9049E836F1F1BE82CC65"
+    },
+    {
+      "path": "supabase/functions/kcny-post-media/index.ts",
+      "sha256": "863DC5DD76669C9C85B99B26CD5F3DF49ACEB684ADEB7A863ABE2380EEF18A27"
+    },
+    {
+      "path": "supabase/functions/runtime-check.d.ts",
+      "sha256": "B469438EE6B10153D61B28192459650ABCCA67A9265177B3AEA46746B14BA27D"
+    },
+    {
+      "path": "supabase/functions/tsconfig.check.json",
+      "sha256": "9B265C61FAF06F2A3E232A2858BC822861DC071799B0F8738581FA814D61153F"
+    },
+    {
+      "path": "supabase/maintenance/install-production-026.sql",
+      "sha256": "78B8B9951D2D413D72C56F79EAA9119A23045E0BF3E554179DCA3A771A176B32"
+    },
+    {
+      "path": "supabase/maintenance/install-test-026.sql",
+      "sha256": "775CDA76F0E12BC27E7B93E28868DDABB76D227A65FB22180ED9D4FBB4ACEB31"
+    },
+    {
+      "path": "supabase/maintenance/production-media.env.example",
+      "sha256": "A81C3089B651F42BA35B56A5BE97FAC5BAC0881EE425E125B8A24F97C0B1ABDB"
+    },
+    {
+      "path": "supabase/maintenance/schedule-control-026.sql",
+      "sha256": "757020D09B3B17DBF2F501BBE47B4C5A7F47C992C882013407C262E4717806CA"
+    },
+    {
+      "path": "supabase/maintenance/test-media.env.example",
+      "sha256": "0020897E199BAAE7D5FB3B13503E2839867A516A189DC5D9D00359D5235083BB"
+    },
+    {
+      "path": "supabase/maintenance/verify-release-source-026.mjs",
+      "sha256": "6D054DC7B46B2F545EC89450A5367586D072902F1CE72619E62B6EA150793EBD"
+    },
+    {
+      "path": "supabase/migrations/20261024162328_post_image_lifecycle.sql",
+      "sha256": "B84541E23FAF0CF3D6A82A5FED567659F290F860B04655EDF6799060936D485E"
+    },
+    {
+      "path": "supabase/migrations/20261024164540_post_image_cleanup_guards.sql",
+      "sha256": "A387E8367ACF4D1542CA1BF704A941823CC23F4ED880AE1D7207369F6824A176"
+    },
+    {
+      "path": "supabase/migrations/20261024182118_post_image_outcomes_maintenance_022.sql",
+      "sha256": "5EC587AE2A70A36D6C647885D7782E5C7C135A21203F213D5C2E83FE7AB8C6A0"
+    },
+    {
+      "path": "supabase/migrations/20261025061601_post_media_scheduled_maintenance_024.sql",
+      "sha256": "C6F1EAE377CC1146D6AF0014C98AB1F37929084990D3A0800A44F63AE1BCB510"
+    },
+    {
+      "path": "supabase/migrations/20261025062825_post_media_maintenance_status_024.sql",
+      "sha256": "364199EB2BA80C4BE3A641F6C9C17B5F0FA70665ECF4721DC7A1421A424E82D6"
+    },
+    {
+      "path": "supabase/migrations/20261025095904_post_media_production_adaptation_026.sql",
+      "sha256": "0A2846B2F55B2A11B180FD8474484FC3ED57359E87444D4D95EAFE609B6CED62"
+    },
+    {
+      "path": "tests/post-media-021.test.mjs",
+      "sha256": "81DF295506064C1BD4AB4836252B747BD15D72413AD8B8FC3BB051330D653A71"
+    },
+    {
+      "path": "tests/post-media-022.test.mjs",
+      "sha256": "450E675B01FAAFCA00613BBCEC4E73126E94C4F2E0C2CA955058A8A249244D81"
+    },
+    {
+      "path": "tests/post-media-maintenance-024.test.mjs",
+      "sha256": "FA88407C2D941FCF85FF2B9785E2CEF1B77C324AA383D4499735D153D5ED6415"
+    },
+    {
+      "path": "tests/post-media-release-026.test.mjs",
+      "sha256": "B6E56079EEFCD2DF0419EF64FAF5E3F40A2F35A0353CECAA1AD7BB6AB627EAFB"
+    },
+    {
+      "path": "tests/sql/media-maintenance-026.sql",
+      "sha256": "67764E01F1347BFE1C2B32E2DE090605E21A259877986F54217519575CAF0C88"
+    }
+  ],
+  "secretsIncluded": false
+}

@@ -46,14 +46,14 @@ test('cleanup warning is bilingual and UI retains the acknowledged result',()=>{
  const client=source('lib/post-media-client.ts');assert.match(client,/operation: "outcome"/);assert.match(client,/throw new MediaRequestError\("outcome_unknown"\)/);
 });
 test('trusted maintenance uses bounded discovery and Storage API; ordinary global endpoint absent',async()=>{
- const calls=[];const admin={rpc:async(name,args)=>{calls.push({name,args});return {data:name==='media_maintenance_candidates'?[{owner_id:'owner'}]:name==='media_service'&&args.p_operation==='cleanup_claim'?[{id:'job',lease:'lease',bucket:'kcny-post-staging',path:'11111111-1111-1111-1111-111111111111/22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/original'}]:{},error:null};},storage:{from:()=>({remove:async()=>({error:null})})}};
+ const calls=[];const admin={rpc:async(name,args)=>{calls.push({name,args});return {data:name==='media_maintenance_candidates'?[{owner_id:'owner'}]:name==='media_service'&&args.p_operation==='cleanup_claim'?[{id:'job',lease:'lease',bucket:'kcny-post-staging',path:'11111111-1111-1111-1111-111111111111/22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333/original'}]:{},error:null};},storage:{from:()=>({remove:async paths=>({data:paths.map(name=>({name})),error:null})})}};
  const result=await maintainMediaBatch(admin);assert.equal(result.deleted,1);assert.equal(calls[0].args.p_limit,20);assert.ok(calls.some(x=>x.args.p_operation==='cleanup_ack'));
  const sql=source('supabase/migrations/20261024182118_post_image_outcomes_maintenance_022.sql');
  assert.match(sql,/status='deleting' and c.lease_until<now\(\)/);assert.match(sql,/u.state='processing' and coalesce\(u.lease_until/);assert.match(sql,/late_object_observed/);assert.match(sql,/storage.objects/);assert.doesNotMatch(sql,/delete\s+from\s+storage\.objects/i);assert.match(sql,/revoke all on function public.media_maintenance_candidates\(uuid,integer\) from public,anon,authenticated/);
  assert.doesNotMatch(source('app/api/post-media/route.ts'),/"maintenance"/);
 });
 test('interrupted maintenance acknowledgement leaves a retryable failure, never false success',async()=>{
- const admin={rpc:async(name,args)=>({data:name==='media_maintenance_candidates'?[{owner_id:'owner'}]:args.p_operation==='cleanup_claim'?[{bucket:'kcny-post-images',path:'11111111-1111-1111-1111-111111111111/22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333.webp'}]:{},error:args.p_operation==='cleanup_ack'?Error('ack'):null}),storage:{from:()=>({remove:async()=>({error:null})})}};
+ const admin={rpc:async(name,args)=>({data:name==='media_maintenance_candidates'?[{owner_id:'owner'}]:args.p_operation==='cleanup_claim'?[{bucket:'kcny-post-images',path:'11111111-1111-1111-1111-111111111111/22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333.webp'}]:{},error:args.p_operation==='cleanup_ack'?Error('ack'):null}),storage:{from:()=>({remove:async paths=>({data:paths.map(name=>({name})),error:null})})}};
  await assert.rejects(maintainMediaBatch(admin),/maintenance_ack_failed/);
 });
 function clientWithFetch(fetch){

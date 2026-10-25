@@ -1,13 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { maintainMediaBatch } from "../../../lib/media-maintenance.ts";
+import { mediaEnvironment } from "../../../lib/post-media-policy.ts";
 
-// TASK 024 is test-only installation authority. Production requires a separate review.
+// Installation in production remains a separately authorized operation.
 const url = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
 const code = (error: unknown) => error instanceof Error && /^maintenance_[a-z_]+$/.test(error.message) ? error.message : "maintenance_failed";
 export async function handler(request: Request) {
-  if (url !== "https://kirvcbkbkvotnsqnbcyf.supabase.co") return json({ error: "maintenance_environment_denied" }, 403);
+  const environment = mediaEnvironment({ SUPABASE_URL: url, KCNY_MEDIA_ENVIRONMENT: Deno.env.get("KCNY_MEDIA_ENVIRONMENT"), KCNY_MEDIA_DEPLOYMENT_ENV: Deno.env.get("KCNY_MEDIA_DEPLOYMENT_ENV") });
+  if (!environment) return json({ error: "maintenance_environment_denied" }, 403);
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   // Neither publishable API keys nor ordinary Auth JWTs grant global cleanup rights.
   const nonce = request.headers.get("x-kcny-maintenance-id") ?? "";
@@ -20,7 +22,7 @@ export async function handler(request: Request) {
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: boundedFetch } });
   let run: { runId: string; lease: string; after: string | null } | undefined;
   try {
-    const begun = await admin.rpc("media_maintenance_begin", { p_nonce: nonce, p_timestamp: timestamp, p_signature: signature });
+    const begun = await admin.rpc("media_maintenance_begin_v2", { p_nonce: nonce, p_timestamp: timestamp, p_signature: signature, p_environment: environment, p_project_url: url });
     if (begun.error) return json({ error: begun.error.code === "PT401" ? "maintenance_authentication_required" : "maintenance_start_failed" }, begun.error.code === "PT401" ? 401 : 503);
     if (begun.data.state === "busy") return json({ error: "maintenance_already_running" }, 409);
     run = begun.data;

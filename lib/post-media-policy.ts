@@ -3,12 +3,20 @@ export const MEDIA_PRODUCTION_URL = "https://czcyarmramlpmilfhpqo.supabase.co";
 export const MEDIA_MAX_BYTES = 5 * 1024 * 1024;
 export const MEDIA_MAX_PIXELS = 4 * 1024 * 1024;
 export const MEDIA_MIMES = ["image/jpeg", "image/png", "image/webp"] as const;
-export function mediaReadsAvailable(env: Record<string, string | undefined>) {
+// Shared by the application and BOTH Edge entry points. Provider/server config only.
+// A URL alone is not an environment declaration; no implicit test/development fallback.
+export function mediaEnvironment(env: Record<string, string | undefined>): "test" | "production" | null {
   const url = env.NEXT_PUBLIC_SUPABASE_URL ?? env.SUPABASE_URL;
-  const deployment = env.VERCEL_ENV ?? env.KCNY_MEDIA_DEPLOYMENT_ENV ?? "development";
-  if (env.VERCEL_ENV && env.KCNY_MEDIA_DEPLOYMENT_ENV && env.VERCEL_ENV !== env.KCNY_MEDIA_DEPLOYMENT_ENV) return false;
-  if (url === MEDIA_TEST_URL) return ["development", "preview"].includes(deployment) && (env.KCNY_MEDIA_ENVIRONMENT ?? "test") === "test";
-  return url === MEDIA_PRODUCTION_URL && deployment === "production" && env.KCNY_MEDIA_DEPLOYMENT_ENV === "production" && env.KCNY_MEDIA_ENVIRONMENT === "production";
+  const deployment = env.KCNY_MEDIA_DEPLOYMENT_ENV;
+  if (!deployment || !env.KCNY_MEDIA_ENVIRONMENT) return null;
+  if (env.NEXT_PUBLIC_SUPABASE_URL && env.SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_URL !== env.SUPABASE_URL) return null;
+  if (env.VERCEL_ENV && env.VERCEL_ENV !== deployment) return null;
+  if (url === MEDIA_TEST_URL && env.KCNY_MEDIA_ENVIRONMENT === "test" && ["development", "preview"].includes(deployment)) return "test";
+  if (url === MEDIA_PRODUCTION_URL && deployment === "production" && env.KCNY_MEDIA_ENVIRONMENT === "production") return "production";
+  return null;
+}
+export function mediaReadsAvailable(env: Record<string, string | undefined>) {
+  return mediaEnvironment(env) !== null;
 }
 export function mediaWritesAvailable(env: Record<string, string | undefined>) {
   return mediaReadsAvailable(env) && env.KCNY_POST_IMAGES_ENABLED === "true";

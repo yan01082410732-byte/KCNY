@@ -3,15 +3,16 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import ts from 'typescript';
 import {maintainMediaBatch} from '../lib/media-maintenance.ts';
+import {mediaEnvironment} from '../lib/post-media-policy.ts';
 const source=name=>readFileSync(new URL('../'+name,import.meta.url),'utf8');
 const path='11111111-1111-1111-1111-111111111111/22222222-2222-2222-2222-222222222222/33333333-3333-3333-3333-333333333333.webp';
 function fixture({owners=['a'],tasks=[{id:'job',lease:'lease',bucket:'kcny-post-images',path}],errorAt,removeError}={}){
  const calls=[],deletions=[];
- const admin={rpc:async(name,args)=>{calls.push({name,args});return{data:name==='media_maintenance_candidates'?owners.map(owner_id=>({owner_id})):args.p_operation==='cleanup_claim'?tasks:{},error:errorAt===(args.p_operation??name)?Error('injected'):null};},storage:{from:bucket=>({remove:async paths=>{deletions.push({bucket,paths});return{error:removeError??null};}})}};
+ const admin={rpc:async(name,args)=>{calls.push({name,args});return{data:name==='media_maintenance_candidates'?owners.map(owner_id=>({owner_id})):args.p_operation==='cleanup_claim'?tasks:{},error:errorAt===(args.p_operation??name)?Error('injected'):null};},storage:{from:bucket=>({remove:async paths=>{deletions.push({bucket,paths});return{data:paths.map(name=>({name})),error:removeError??null};}})}};
  return{admin,calls,deletions};
 }
 test('maintenance validates owner bounds before any RPC',async()=>{for(const maxOwners of [0,21,1.5]){const f=fixture();await assert.rejects(maintainMediaBatch(f.admin,null,{maxOwners}),/invalid_limit/);assert.equal(f.calls.length,0);}});
-test('maintenance uses configured bounded keyset and persists owner progress',async()=>{const f=fixture({owners:['b','c']}),progress=[];const result=await maintainMediaBatch(f.admin,'a',{maxOwners:2,progress:async p=>progress.push(p)});assert.deepEqual(f.calls[0].args,{p_after:'a',p_limit:2});assert.equal(result.next,'c');assert.equal(result.deleted,2);assert.deepEqual(progress.map(p=>p.cursor),['b','c']);});
+test('maintenance uses configured bounded keyset and persists owner progress',async()=>{const f=fixture({owners:['b','c']}),progress=[];const result=await maintainMediaBatch(f.admin,'a',{maxOwners:2,progress:async p=>progress.push(p)});assert.deepEqual(f.calls[0].args,{p_after:'a',p_limit:2});assert.equal(result.next,'c');assert.equal(result.deleted,2);assert.deepEqual([...new Set(progress.map(p=>p.cursor))],['a','b','c']);});
 test('deadline stop before claim retains starting cursor',async()=>{const f=fixture();const result=await maintainMediaBatch(f.admin,'previous',{canContinue:async()=>false});assert.equal(result.incomplete,true);assert.equal(result.next,'previous');assert.equal(f.deletions.length,0);assert.equal(f.calls.length,1);});
 test('deadline stop after claim leaves remaining job lease recoverable',async()=>{const f=fixture();let guards=0;const result=await maintainMediaBatch(f.admin,'previous',{canContinue:async()=>++guards===1});assert.equal(result.incomplete,true);assert.equal(result.next,'previous');assert.equal(f.deletions.length,0);assert.ok(f.calls.some(x=>x.args.p_operation==='cleanup_claim'));assert.ok(!f.calls.some(x=>x.args.p_operation==='cleanup_ack'));});
 test('lost global lease denies physical removal',async()=>{const f=fixture();await assert.rejects(maintainMediaBatch(f.admin,null,{canContinue:async()=>{throw Error('maintenance_lease_lost');}}),/lease_lost/);assert.equal(f.deletions.length,0);});
@@ -22,9 +23,9 @@ test('completed sweep wraps cursor while partial page advances',async()=>{const 
 
 function worker({project='https://kirvcbkbkvotnsqnbcyf.supabase.co',beginError,busy=false,cleanupError}={}){
  const f=fixture({owners:[]}),calls=[];let captured;
- const admin={...f.admin,rpc:async(name,args)=>{calls.push({name,args});if(name==='media_maintenance_begin')return{error:beginError,data:busy?{state:'busy'}:{runId:'run',lease:'lease',after:null}};if(name==='media_maintenance_finish')return{data:{status:args.p_error?'failed':'completed'},error:null};if(cleanupError&&name==='media_maintenance_candidates')return{data:null,error:Error('failure')};return f.admin.rpc(name,args);}};
+ const admin={...f.admin,rpc:async(name,args)=>{calls.push({name,args});if(name==='media_maintenance_begin_v2')return{error:beginError,data:busy?{state:'busy'}:{runId:'run',lease:'lease',after:null}};if(name==='media_maintenance_finish')return{data:{status:args.p_error?'failed':'completed'},error:null};if(cleanupError&&name==='media_maintenance_candidates')return{data:null,error:Error('failure')};return f.admin.rpc(name,args);}};
  const compiled=ts.transpileModule(source('supabase/functions/kcny-media-maintenance/index.ts'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
- const module={exports:{}};new Function('require','module','exports','Deno',compiled)(name=>name==='@supabase/supabase-js'?{createClient:()=>admin}:{maintainMediaBatch},module,module.exports,{env:{get:name=>name==='SUPABASE_URL'?project:'synthetic-not-a-secret'},serve:fn=>{captured=fn;}});
+ const module={exports:{}};new Function('require','module','exports','Deno',compiled)(name=>name==='@supabase/supabase-js'?{createClient:()=>admin}:name.includes('post-media-policy')?{mediaEnvironment}:{maintainMediaBatch},module,module.exports,{env:{get:name=>({SUPABASE_URL:project,KCNY_MEDIA_ENVIRONMENT:'test',KCNY_MEDIA_DEPLOYMENT_ENV:'development'}[name]??'synthetic-not-a-secret')},serve:fn=>{captured=fn;}});
  return{handler:captured,calls};
 }
 const signedHeaders={'x-kcny-maintenance-id':'11111111-1111-1111-1111-111111111111','x-kcny-maintenance-time':String(Math.floor(Date.now()/1000)),'x-kcny-maintenance-signature':'0'.repeat(64)};
