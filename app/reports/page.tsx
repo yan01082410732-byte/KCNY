@@ -4,6 +4,7 @@ import { reportingContext } from "@/lib/report-server";
 import { communityPage, olderThanFilter, parseCommunityCursor } from "@/lib/community-pagination";
 import { REPORT_FIELDS, REPORT_PAGE_SIZE, type ReportCase } from "@/lib/reporting";
 import { ReportList, ReportsUnavailable } from "@/components/ReportCases";
+import { operationsEnvironmentEnabled } from "@/lib/report-operations";
 
 export const dynamic = "force-dynamic";
 
@@ -17,5 +18,8 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   if (cursor) query = query.or(olderThanFilter(cursor));
   const { data, error } = await query;
   const page = communityPage((data ?? []) as ReportCase[], REPORT_PAGE_SIZE);
-  return <ReportList language={language} reports={page.items} error={Boolean(error)} nextCursor={page.nextCursor} reviewer={ctx.reviewer} />;
+  return <>{operationsEnvironmentEnabled(process.env) && <nav className="shell case-navigation reporting-operations-navigation" aria-label={language === "KR" ? "사건 정보 및 운영" : "案件资料与运营"}>
+    <a href={`/reports/privacy?lang=${language}`}>{language === "KR" ? "내 정보 요청" : "我的资料请求"}</a>
+    {ctx.reviewer && <a href={`/reports/operations?lang=${language}`}>{language === "KR" ? "운영 및 보관 검토" : "运营与留存复核"}</a>}
+  </nav>}<ReportList language={language} reports={page.items} error={Boolean(error)} nextCursor={page.nextCursor} reviewer={ctx.reviewer} /></>;
 }

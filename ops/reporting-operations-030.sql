@@ -1,0 +1,134 @@
+-- TASK 030 MANAGEMENT-ONLY REFERENCE TEMPLATE. DO NOT EXECUTE AS A SCRIPT.
+-- Every statement is deliberately commented and contains unresolved placeholders.
+-- No credentials, account seeds, real account/case UUIDs or production enablement.
+-- Current batch permits only the independently verified isolated test project.
+-- Production reporting remains OFF/OFF; operations remain OFF by default.
+-- An approval reference is 5..120 ASCII characters, first alphanumeric,
+-- then alphanumeric or . _ : / -; it must identify real recorded authority.
+-- A literal project/ref argument is NOT proof of the actual connection target.
+-- Verify target through the authorized management connection BEFORE any write.
+-- Do not use ordinary user sessions, user_metadata or service_role impersonation.
+-- Authoritative contract:
+-- supabase/migrations/20261026082221_reporting_operations_privacy_030.sql
+
+-- 1. READ-ONLY PREFLIGHT. Review the connected project and existing migration
+-- independently; current_user MUST be postgres for the private management calls.
+-- select current_user, session_user;
+-- select enabled from reporting_private.configuration where singleton;
+-- select enabled,policy_approved,policy_version
+--   from reporting_private.operations_configuration where singleton;
+-- select pg_catalog.has_function_privilege('authenticated',
+--   'reporting_private.set_reviewer(uuid,boolean,text)','EXECUTE') as must_be_false,
+--   pg_catalog.has_function_privilege('authenticated',
+--   'reporting_private.redact_case(uuid,integer,text)','EXECUTE') as must_be_false;
+
+-- 2. GRANT ONE EXPLICITLY BOUND REVIEWER. The owner must approve the exact,
+-- confirmed existing Auth UUID through a trusted binding. Do not guess identity
+-- from name/email similarity, registration order or current browser presence.
+-- Do not bring a synthetic test UUID into production. No general admin role.
+-- begin;
+-- set local lock_timeout='5s';
+-- set local statement_timeout='30s';
+-- select reporting_private.set_reviewer(
+--   '__EXPLICITLY_VERIFIED_OWNER_AUTH_UUID__'::uuid,
+--   true,
+--   '__RECORDED_REVIEWER_GRANT_APPROVAL_REFERENCE__');
+-- commit;
+-- Verify returned granted=true; changed may be false for an idempotent grant.
+-- Verify a real reviewer session can call only approved reviewer APIs.
+
+-- 3. REVOKE THE EXACT REVIEWER. A current ordinary session must then receive
+-- rejection from reviewer RPCs; cached frontend state is not authorization.
+-- begin;
+-- set local lock_timeout='5s';
+-- set local statement_timeout='30s';
+-- select reporting_private.set_reviewer(
+--   '__EXPLICITLY_VERIFIED_OWNER_AUTH_UUID__'::uuid,
+--   false,
+--   '__RECORDED_REVIEWER_REVOCATION_APPROVAL_REFERENCE__');
+-- commit;
+-- Verify returned granted=false; changed=false means membership was absent.
+
+-- 4. CANDIDATE POLICY APPROVAL IS A SEPARATE MANAGEMENT DECISION.
+-- Do not change this in production without separate explicit owner approval.
+-- The candidate 90-day rule is not a legal-compliance guarantee. Record owner
+-- policy/hold/appeal approval in the controlled operation record BEFORE running.
+-- Example only; no production activation is authorized by this commented line:
+-- update reporting_private.operations_configuration
+--   set policy_approved=true,policy_version='__EXPLICITLY_APPROVED_POLICY_VERSION__'
+--   where singleton;
+-- This does NOT enable reporting or operations and does not clear any case.
+
+-- 5. REVIEWER-SESSION CALL SIGNATURES (not management impersonation).
+-- App and DB gates must be explicitly authorized in the verified environment.
+-- Normal requester submits only their own case, never a client requester ID:
+-- select public.submit_report_data_request(
+--   '__OWN_CASE_UUID__'::uuid,'__STABLE_CLIENT_REQUEST_UUID__'::uuid,
+--   '__access_OR_correction_OR_deletion__','__BOUNDED_REQUEST_DETAILS__');
+-- Reviewer overview is bounded; exact selection survives leaving the due queue:
+-- select public.report_operations_overview('__EXACT_CASE_UUID__'::uuid);
+-- Review only: expected review version is 0 if no previous review exists.
+-- select public.record_report_retention(
+--   '__EXACT_CASE_UUID__'::uuid,__CURRENT_CASE_VERSION__,__CURRENT_REVIEW_VERSION__,
+--   '__retain_OR_eligible_for_clear__','__none_OR_appeal_OR_legal_OR_investigation__',
+--   '__BOUNDED_INTERNAL_REVIEW_REASON__','__FUTURE_WITHIN_366_DAYS_UTC__'::timestamptz);
+-- eligible_for_clear requires resolved/dismissed >=90 days and hold=none;
+-- saving this decision NEVER erases text or executes a data request.
+-- select public.review_report_data_request(
+--   '__EXACT_DATA_REQUEST_UUID__'::uuid,__CURRENT_REQUEST_VERSION__,
+--   '__under_review_OR_approved_OR_rejected__','__PUBLIC_RESPONSE__',
+--   '__PRIVATE_REVIEW_REASON__','__ACTUAL_APPROVAL_REFERENCE_IF_APPROVING__');
+-- pending -> under_review -> approved/rejected; there is no reviewer fulfilled
+-- argument. Access/correction require actual separately approved secure work;
+-- do not claim an export/correction/deletion from approval alone.
+-- select public.report_operations_history('__EXACT_CASE_UUID__'::uuid);
+
+-- 6. ACTUAL MANAGEMENT REDACTION: SINGLE-CASE, SCOPED, NO TRIGGER DISABLING.
+-- Requires separate approved policy + exact case authorization + current case
+-- version + closed >=90 days + eligible_for_clear + no hold/open data request.
+-- Approved access/correction requests also block clearing until genuinely
+-- fulfilled under a separately approved follow-up contract.
+-- First inspect only necessary metadata, do not export complaint text to logs:
+-- select id,kind,status,version,updated_at,content_cleared_at
+--   from public.reports where id='__APPROVED_CASE_UUID__'::uuid;
+-- select review_version,decision,hold,next_review_at
+--   from reporting_private.retention_reviews
+--   where report_id='__APPROVED_CASE_UUID__'::uuid;
+-- begin;
+-- set local lock_timeout='5s';
+-- set local statement_timeout='30s';
+-- select reporting_private.redact_case(
+--   '__APPROVED_CASE_UUID__'::uuid,__CURRENT_CASE_VERSION__,
+--   '__RECORDED_EXACT_CASE_CLEARING_APPROVAL_REFERENCE__');
+-- commit;
+-- Check the actual returned cleared/already_cleared/counts, not just HTTP 200.
+-- The same case + same reference retry returns its receipt; another reference
+-- conflicts. On any failure rollback transaction and preserve evidence.
+-- Do not manually insert redaction_scope or modify immutable-trigger guards.
+-- Do not execute ops/reporting-retention-020.sql: historical DO NOT EXECUTE.
+
+-- 7. SAFE POSTCONDITIONS (METADATA/COUNTS ONLY; redact operator evidence too).
+-- select id,kind,status,version,content_cleared_at,
+--   description='Sensitive content cleared' as text_cleared,
+--   public_resolution='' as public_text_cleared
+--   from public.reports where id='__APPROVED_CASE_UUID__'::uuid;
+-- select result from reporting_private.redaction_receipts
+--   where report_id='__APPROVED_CASE_UUID__'::uuid;
+-- select count(*) as must_be_zero from reporting_private.requests
+--   where report_id='__APPROVED_CASE_UUID__'::uuid;
+-- select count(*) as must_be_zero from reporting_private.data_request_keys
+--   where request_record_id in(select id from public.report_data_requests
+--     where report_id='__APPROVED_CASE_UUID__'::uuid);
+-- Verify original audit/event IDs, order, from/to state and timestamps match
+-- pre-clearing metadata; original free-text/actor identities are scoped-cleared.
+-- Verify direct client audit edits/deletes and private function calls still fail.
+-- Do not print actor UUIDs, original notes or approval evidence in public logs.
+
+-- 8. INCIDENT STOP / APPLICATION ROLLBACK: only after explicit authorization.
+-- Set app KCNY_REPORTING_OPERATIONS_ENABLED=false and KCNY_REPORTS_ENABLED=false
+-- through the approved configuration path. Database opt-outs, when authorized:
+-- update reporting_private.operations_configuration set enabled=false where singleton;
+-- update reporting_private.configuration set enabled=false where singleton;
+-- Preserve cases, audits, privacy requests and receipts. Do not DROP, DELETE,
+-- disable triggers, restore sensitive text or pretend app rollback undoes a
+-- committed redaction. No automatic retention/clearing schedule is installed.

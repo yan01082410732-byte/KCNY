@@ -224,3 +224,14 @@ One targeted retrospective complete. No confirmed unresolved security/data-loss/
 | MEDIA-028-01 | Prior fixture CLOSED | Exact MEDIA-026-04 fixture passed its safety gate and lease/reference checks; existing v2 Storage maintenance physically deleted1, already-absent0, ack1, failure0. Due tasks/expired leases0, other images preserved, writesOFF and schedulespaused. |
 
 One affected-boundary retrospective only. No confirmed new critical authorization/privacy/data-loss defect; no production, media-source, reporting activation, AI or shared coordination changes. See NOTIFICATION_PREFERENCES_IMPLEMENTATION_028.md and NOTIFICATION_PREFERENCES_PRODUCTION_CHANGE_REQUEST_028.md.
+
+# Reporting operations — 2026-10-26 (TASK030)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| OPS-030-01 | New-flow regression — FIXED | Real retention save succeeded but version-key revalidation remounted the form and erased acknowledgement. Stable entity keys and original-version snapshots preserve truthful confirmation/drafts and optimistic conflicts. Original browser 5/6 plus separate targeted1/1 retained. |
+| OPS-030-02 | Environment limitation — resolved | First restricted local server could not reach test Auth; ordinary SDK worked. Same localhost source under authorized normal-network identity passed actual login. No Auth policy or credentials changed. |
+| OPS-030-03 | Production gate | Real owner reviewer binding, candidate policy/hold/appeal approval, secure access/correction fulfillment process, user notice and release approval absent. Production remains OFF/OFF; not a fake-enabled completed service. |
+| OPS-030-04 | Non-critical / deferred | Operations due/request overview is intentionally bounded to20; own requests have keyset paging. Older reviewer request-history expansion and real iPad acceptance are future work; no automated retention job installed. |
+
+One scoped retrospective completed. No confirmed remaining critical issue in exercised030 paths. Scoped sensitive redaction changes the immutable-audit contract and needs explicit future production approval; the historical020 trigger-disable template must not be executed.
