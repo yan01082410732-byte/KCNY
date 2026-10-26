@@ -235,3 +235,14 @@ One affected-boundary retrospective only. No confirmed new critical authorizatio
 | OPS-030-04 | Non-critical / deferred | Operations due/request overview is intentionally bounded to20; own requests have keyset paging. Older reviewer request-history expansion and real iPad acceptance are future work; no automated retention job installed. |
 
 One scoped retrospective completed. No confirmed remaining critical issue in exercised030 paths. Scoped sensitive redaction changes the immutable-audit contract and needs explicit future production approval; the historical020 trigger-disable template must not be executed.
+
+# Human review workspace — 2026-10-26 (TASK031)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| REVIEW-031-01 | Concurrent editing safety — delivered | Draft expected-version snapshots prevent silent overwrites. Explicit refresh adopts current status/version without losing private/public text; actual409→refresh→v3 save passed. |
+| REVIEW-031-02 | Test harness — corrected | Initial browser6/8 retained; generic alert locator included route announcer and two expected strings did not match existing honest UI text. Scoped actual-message assertions passed separate2/2. No business assertion weakened or failed history replaced. |
+| REVIEW-031-03 | Non-critical / deferred | A manually supplied pre-2000 snapshot parses locally but the DB rejects it, showing unavailable rather than zero. Align validation in later consolidated polish; no authorization bypass. |
+| REVIEW-031-04 | Non-critical / deferred | FrozenasOf is not MVCC historical state: legitimate status changes can remove cases from a filter while paging. Real iPad remains PENDING; count-query scale assessment awaits operational volume. |
+
+One scoped retrospective completed. No confirmed unresolved authorization/privacy/core-flow defect in exercised031 paths; no production or AI integration enabled.

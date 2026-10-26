@@ -29,7 +29,9 @@ test("public case contract excludes internal reviewer identity and notes", () =>
   assert.doesNotMatch(read("app/reports/[id]/page.tsx"),/report_review_history/);
 });
 test("case lists use bounded keyset ordering and preserve review status", () => {
-  for(const file of ["app/reports/page.tsx","app/reports/review/page.tsx"]){const source=read(file);assert.match(source,/\.limit\(REPORT_PAGE_SIZE \+ 1\)/);assert.match(source,/\.order\("id",/);assert.match(source,/olderThanFilter\(cursor\)/);}
+  for(const file of ["app/reports/page.tsx","app/reports/review/page.tsx"]){const source=read(file);assert.match(source,/\.limit\(REPORT_PAGE_SIZE \+ 1\)/);assert.match(source,/\.order\("id",/);}
+  assert.match(read("app/reports/page.tsx"),/olderThanFilter\(cursor\)/);
+  assert.match(read("app/reports/review/page.tsx"),/reviewCursorFilter\(filters.before, filters.order\)/);
   assert.match(read("components/ReportCases.tsx"),/before: nextCursor/);
 });
 test("reviewers are private members rather than mutable JWT metadata", () => {
@@ -78,5 +80,7 @@ test("case detail labels are localized rather than raw enum codes", () => {
 test("review drafts stay controlled across failed server action form resets", () => {
   const source=read("components/ReportReviewForm.tsx");
   for(const field of ["nextStatus","publicResolution","decisionReason","internalNote"])assert.ok(source.includes(`value={${field}}`));
-  assert.match(read("app/reports/review/[id]/page.tsx"),/key=\{data.version\}/);
+  assert.match(read("app/reports/review/[id]/page.tsx"),/ReportReviewForm key=\{id\}/);
+  assert.match(source,/name="version" value=\{expectedVersion\}/);
+  assert.doesNotMatch(source,/sessionStorage|localStorage/);
 });

@@ -20,3 +20,10 @@ Delivered owner-scoped privacy requests, trusted reviewer retention review, audi
 No production write, migration, reviewer assignment, reporting enablement, push or deployment. Production reporting application/database OFF/OFF. Reviewer UUID binding remains absent; one trusted owner confirmation must be combined with policy/operations and future release approval. Access/correction actual secure delivery remains an approved operator responsibility, not automatic fulfillment.
 
 Real iPad/Safari remains PENDING. AI service connection remains NOT_CONNECTED; model training not performed.
+
+## TASK031 checkpoint
+
+TASK030 ancestor: `e934c675a095dbf33ee4a5fedd697d3a49076ab1`.
+Extended the existing reviewer workspace with actual scoped summaries, validated filters, frozen-as-of ascending/descending keysets, version/time, conflict refresh retaining drafts, safe back and real next-case navigation. My Reports remains owner-scoped.
+
+Focused35/35, SDK6/6, initial browser6/8 plus separate locator-corrected2/2; original failures retained. Real concurrent conflict/save, private-note isolation,23-row tie pagination and390/820/1280 keyboard/layout verified. See TASK031_WORKSPACE.md. Ready for local checkpoint; TASK032 follows without production changes.

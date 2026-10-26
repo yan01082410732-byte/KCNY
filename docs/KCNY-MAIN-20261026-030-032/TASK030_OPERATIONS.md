@@ -60,6 +60,8 @@ Cleared material includes:
 
 Preserved: case ID/kind/status, original case chronology, audit/event IDs, event order, from/to states, original event timestamps and operation actions. The function appends a separate clearing event and a receipt with counts and month-level case summary. It does not delete cases, historical events, target posts/comments or accounts. Existing reviewer membership records are a separate security audit, not cleared as part of complaint-content retention.
 
+Preserved stable identifiers are pseudonymous operational records, not a guarantee of irreversible anonymization. Their retention, approval references and security membership audit require a separately approved minimal retention/access policy; do not describe this operation as erasing every possible re-identification source or external backup.
+
 The immutable trigger permits only the exact, scoped de-identification fields/values while the private capability exists. Unapproved edits/deletes still raise an error. Do not insert the capability manually or weaken the trigger. Transaction failure rolls the operation back. A retry of the same case and same authorization reference returns the existing receipt with `already_cleared=true`; a different reference conflicts. After a committed irreversible clearing, rolling back the application does not restore removed sensitive text; never claim that it does.
 
 **Historical danger:** `ops/reporting-retention-020.sql` is preserved history, **DO NOT EXECUTE**. It contains an old trigger-disable approach and does not cover the new request data. Use only the new scoped management function after separate target/policy/case authorization; do not repair the old script in place.

@@ -4,6 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { reportFailure, reportsEnvironmentEnabled, validateReportInput, type ReportSubmissionState } from "@/lib/reporting";
 
+function refreshReports(paths: string[]) {
+  // An acknowledged DB commit remains successful if cache refresh is unavailable.
+  // The user may explicitly reload; never suggest repeating the committed mutation.
+  try { for (const path of paths) revalidatePath(path); } catch { /* Confirmed save is authoritative. */ }
+}
+
 export async function submitReport(_previous: ReportSubmissionState, formData: FormData): Promise<ReportSubmissionState> {
   if (!reportsEnvironmentEnabled(process.env)) return { status: "error", reason: "unavailable" };
   const result = validateReportInput({ kind: formData.get("kind"), targetType: formData.get("targetType"), targetId: formData.get("targetId"), reason: formData.get("reason"), description: formData.get("description") });
@@ -21,7 +27,7 @@ export async function submitReport(_previous: ReportSubmissionState, formData: F
     });
     if (error) return { status: "error", reason: reportFailure(error.message) };
     if (typeof reportId !== "string") return { status: "error", reason: "unavailable" };
-    revalidatePath("/reports");
+    refreshReports(["/reports"]);
     return { status: "success", reportId };
   } catch { return { status: "error", reason: "unavailable" }; }
 }
@@ -41,8 +47,8 @@ export async function reviewReport(_previous: ReportSubmissionState, formData: F
       p_decision_reason: String(formData.get("decisionReason") ?? ""), p_internal_note: String(formData.get("internalNote") ?? ""),
     });
     if (result.error) return { status: "error", reason: reportFailure(result.error.message) };
-    if (!Number.isSafeInteger(result.data)) return { status: "error", reason: "unavailable" };
-    revalidatePath(`/reports/${reportId}`); revalidatePath(`/reports/review/${reportId}`); revalidatePath("/reports"); revalidatePath("/reports/review");
-    return { status: "success", reportId };
+    if (!Number.isSafeInteger(result.data) || result.data !== expected + 1) return { status: "error", reason: "unavailable" };
+    refreshReports([`/reports/${reportId}`, `/reports/review/${reportId}`, "/reports", "/reports/review"]);
+    return { status: "success", reportId, caseVersion: result.data };
   } catch { return { status: "error", reason: "unavailable" }; }
 }
