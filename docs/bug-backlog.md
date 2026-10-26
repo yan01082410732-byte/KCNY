@@ -246,3 +246,13 @@ One scoped retrospective completed. No confirmed remaining critical issue in exe
 | REVIEW-031-04 | Non-critical / deferred | FrozenasOf is not MVCC historical state: legitimate status changes can remove cases from a filter while paging. Real iPad remains PENDING; count-query scale assessment awaits operational volume. |
 
 One scoped retrospective completed. No confirmed unresolved authorization/privacy/core-flow defect in exercised031 paths; no production or AI integration enabled.
+
+# AI contract preparation — 2026-10-26 (TASK032)
+
+| ID | Class / status | Finding |
+|---|---|---|
+| AI-032-01 | Development compilation — FIXED | Initial TypeScript union narrowing could not safely access output on an error response. Explicit error discriminant fixed it; targeted and final TypeScript checks PASS. No runtime/provider failure asserted. |
+| AI-032-02 | Contract hardening — delivered | Strict keys, bounded dense search arrays, duplicate/rank/UUID/language checks, fail-closed hostile unknown objects and fresh trusted visibility callbacks;40 synthetic tests pass. |
+| AI-032-03 | Deliberate integration gate | Four domains are NOT_CONNECTED; actual session/database adapters, TASKB service compatibility, consent/privacy/retention and cost authorization require later integration approval. Mock validation is not live model or production permission evidence. |
+
+One scoped retrospective completed. No external AI, training, TASKB or production changes. Field minimization does not promise arbitrary complaint prose is PII-free.

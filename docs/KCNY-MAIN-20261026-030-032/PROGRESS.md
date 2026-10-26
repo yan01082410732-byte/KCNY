@@ -27,3 +27,16 @@ TASK030 ancestor: `e934c675a095dbf33ee4a5fedd697d3a49076ab1`.
 Extended the existing reviewer workspace with actual scoped summaries, validated filters, frozen-as-of ascending/descending keysets, version/time, conflict refresh retaining drafts, safe back and real next-case navigation. My Reports remains owner-scoped.
 
 Focused35/35, SDK6/6, initial browser6/8 plus separate locator-corrected2/2; original failures retained. Real concurrent conflict/save, private-note isolation,23-row tie pagination and390/820/1280 keyboard/layout verified. See TASK031_WORKSPACE.md. Ready for local checkpoint; TASK032 follows without production changes.
+
+## TASK032 and final verification
+
+TASK031 checkpoint: `ac5daf93a6441a227d34323c0de5d8ce37a0fbee`.
+Four v1 DTO/validation and trusted-composition boundary modules/tests delivered; old complaint contract unchanged. No actual AI endpoint or provider; all adapters return NOT_CONNECTED. Synthetic contract40/40, final full suite624/624, TypeScript PASS, optimized local build PASS (~28.1s), diff check PASS. `.env.example` explicitly declares default-OFF reporting/operations; no actual environment file changed.
+
+Final checks used original source throughout; only test DB received the two batch migrations. Complete stored migration statements match normalized-LF source exactly; differing MCP ledger timestamps are recorded, not repaired. Private schema client usage/grants/EXECUTE0; exposed requests RLS ON/no direct DML; summary anon denied; capability rows0 and policy approvalFALSE. Test media writesOFF and activeCron0 stayed unchanged.
+
+Final production read-only check: reporting applicationOFF (actual scoped Vercel configuration), DB OFF, reviewer0, cases0; mediaON/activeCron1 and notification preference contract unchanged; neither new migration installed. No push/deploy, paid resource, TASKB, AI provider or production user-data operation performed.
+
+Stage030/031 real browser failures and separate passes are recorded in their documents. Initial local network restriction and the development032 type-narrowing failure are preserved as failures/rechecks, not rewritten as original green runs. Only one scoped retrospective per stage; minor pre2000 snapshot validation, reviewer-request history expansion, real iPad and future operational scale follow-up remain deferred.
+
+Closeout: new isolated operations DB gate OFF/policyFALSE; original test reporting/reviewer preserved, A/B not promoted, capability0, mediaOFF/Cron0. Local server stopped and all test browser contexts closed. No background continuation scheduled.
