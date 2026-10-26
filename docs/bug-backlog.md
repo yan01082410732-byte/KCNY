@@ -256,3 +256,17 @@ One scoped retrospective completed. No confirmed unresolved authorization/privac
 | AI-032-03 | Deliberate integration gate | Four domains are NOT_CONNECTED; actual session/database adapters, TASKB service compatibility, consent/privacy/retention and cost authorization require later integration approval. Mock validation is not live model or production permission evidence. |
 
 One scoped retrospective completed. No external AI, training, TASKB or production changes. Field minimization does not promise arbitrary complaint prose is PII-free.
+
+# Release readiness and reviewer binding — 2026-10-26 (TASK033)
+
+One read-only affected-boundary/React retrospective; no unrelated repair loop. Binding confirms the actual authenticated account only, not reviewer membership or owner approval. Production reporting remains OFF/OFF and operations/binding opt-ins remain default OFF.
+
+| ID | Class / status | Finding |
+|---|---|---|
+| READY-033-01 | Non-critical acceptance / PENDING | Actual iPad/Safari hardware acceptance is still PENDING. Desktop Chromium and mobile/tablet viewport results must be reported as browser/viewport evidence, never as real iPad acceptance. |
+| READY-033-02 | Non-critical source edge case / deferred | The binding page/action currently classify every Auth error with a positive status below500 as login-required. A provider429 would therefore suggest login rather than temporary retry. No actual429 was observed in this review; refine the bounded error classification during later consolidated polish, not by changing Auth policies. |
+| READY-033-03 | Non-critical account-context edge case / unverified | The page displays its server-rendered UUID while the action always signs the freshly verified session UUID. An account change in another tab before confirmation could make those differ. No role is granted and independent owner binding remains mandatory. Reproduce narrowly before a future context-change UX improvement; do not treat a client-supplied UUID as identity authority. |
+| READY-033-04 | Test harness history / closed by separate rechecks | Original TASK033 browser run retained7PASS/3FAIL: terminal form selector, guessed `/following` URL instead of actual `/?feed=following`, and desktop focus race. First targeted5PASS/1FAIL retained (remaining exact-text locator omitted the public-response label); final public-result3/3PASS. Revocation, real self-confirmation without grant, independent test-only restoration and replay rejection passed separately. No source fix or rewritten all-green original run. |
+| READY-033-05 | Production approval gate — NOT an ordinary bug | A signed self-confirmation receipt is not a role grant or verified ownership approval. Real production owner UUID binding, approved policy/hold rules, responsible management operator, secure access/correction fulfillment and separate migration/application/enablement authorization remain explicit gates. A completed policy draft does not satisfy those decisions; no fake fulfillment, guessed account grant or automatic clearing. |
+
+Source review found no confirmed new critical authorization, privacy, data-loss or core-flow defect in the binding boundary. Fresh confirmed non-anonymous identity, default-off exact environment gating, controlled consent, duplicate guard, timer cleanup, escaped output, readonly receipt and no client secret/browser persistence were checked. Final browser batch status belongs to its actual evidence, not this source review. No DB write, grant, production enablement or AI call was performed by this retrospective.
