@@ -2,6 +2,7 @@ import { HomePageClient } from "@/components/HomePageClient";
 import { redirect } from "next/navigation";
 import { isLanguage, normalizeLanguage } from "@/lib/auth";
 import { followingFeedHref, normalizeFeedCategory, normalizeFeedMode, type FeedMode } from "@/lib/following-feed";
+import { followingFeedArgs } from "@/lib/following-feed-query";
 import { toPublicPosts, type PublicPost } from "@/lib/posts";
 import { applyViewerLikeState } from "@/lib/post-likes";
 import { applyPostBookmarkState } from "@/lib/post-bookmarks";
@@ -30,7 +31,6 @@ export default async function HomePage({
   let username: string | undefined;
   let displayName: string | undefined;
   let userId: string | undefined;
-  let followingIds: string[] = [];
   let posts: PublicPost[] = [];
   let contentUnavailable = false;
   let nextCursor: string | undefined;
@@ -52,14 +52,22 @@ export default async function HomePage({
     }
 
     if (feed === "following" && userId) {
-      const { data: follows, error } = await supabase.from("user_follows").select("following_id").eq("follower_id", userId);
-      if (error) { contentUnavailable = true; logServiceFailure("feed-follows", error); }
-      followingIds = (follows ?? []).flatMap((row) => typeof row.following_id === "string" && row.following_id !== userId ? [row.following_id] : []);
+      const { data, error } = await supabase
+        .rpc("following_feed_page", followingFeedArgs(category, cursor, FEED_PAGE_SIZE + 1))
+        .select(publicPostSelect)
+        .order("created_at", { ascending: false }).order("id", { ascending: false });
+      if (error || !Array.isArray(data)) {
+        contentUnavailable = true;
+        logServiceFailure("feed-following", error ?? { code: "invalid_response" });
+      } else {
+        const page = communityPage(data, FEED_PAGE_SIZE);
+        posts = toPublicPosts(page.items);
+        nextCursor = page.nextCursor;
+      }
     }
 
-    if (feed === "all" || (userId && followingIds.length > 0)) {
+    if (feed === "all") {
       let query = supabase.from("posts").select(publicPostSelect).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(FEED_PAGE_SIZE + 1);
-      if (feed === "following") query = query.in("author_id", followingIds);
       if (category) query = query.eq("category", category);
       if (cursor) query = query.or(olderThanFilter(cursor));
       const { data, error } = await query;

@@ -50,9 +50,10 @@ test("following feed copy is bilingual", () => {
   assert.match(helpers, /팔로잉 피드/);
 });
 
-test("following query derives ids from the current authenticated user then filters posts", () => {
-  assert.match(homePage, /from\("user_follows"\)\.select\("following_id"\)\.eq\("follower_id", userId\)/);
-  assert.match(homePage, /query = query\.in\("author_id", followingIds\)/);
+test("following query uses a bounded session-derived RPC without fetching follow ids", () => {
+  assert.match(homePage, /feed === "following" && userId/);
+  assert.match(homePage, /\.rpc\("following_feed_page", followingFeedArgs\(category, cursor, FEED_PAGE_SIZE \+ 1\)\)/);
+  assert.doesNotMatch(homePage, /from\("user_follows"\)|followingIds|\.in\("author_id"/);
   assert.doesNotMatch(homePage, /auth\.admin|service_role/);
 });
 
