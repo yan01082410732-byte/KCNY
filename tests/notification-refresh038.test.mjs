@@ -312,7 +312,7 @@ function channelHub() {
     },
   };
 }
-function bellHarness(hub = channelHub()) {
+function bellHarness(hub = channelHub(), pollingEnabled = true) {
   const clock = fakeClock(), requests = [], sessions = [], hooks = [], effects = [];
   const window = new EventTarget(), document = new EventTarget();
   document.visibilityState = "visible";
@@ -352,8 +352,9 @@ function bellHarness(hub = channelHub()) {
     "@/lib/notification-refresh": { createNotificationRefreshController: (options) => createNotificationRefreshController({ ...options, clock }) },
   };
   const module = { exports: {} };
-  new Function("require", "module", "exports", "window", "document", "BroadcastChannel", bellJavaScript)(
+  new Function("require", "module", "exports", "window", "document", "BroadcastChannel", "process", bellJavaScript)(
     (name) => { assert.ok(imports[name], name); return imports[name]; }, module, module.exports, window, document, hub.Channel,
+    { env: { NEXT_PUBLIC_KCNY_NOTIFICATION_POLLING_ENABLED: pollingEnabled ? "true" : undefined } },
   );
   const render = (language = "CN") => { hookIndex = 0; return module.exports.NotificationBell({ language }); };
   const commit = () => { while (effects.length) effects.shift()(); };
@@ -438,4 +439,29 @@ test("038 actual bell hides old navigation snapshot before effect cleanup and ab
   h.auth("account-b"); await h.clock.advance(0); await h.respond(1);
   assert.equal(h.render().props["aria-label"], notificationCountLabel("CN", 1, false));
   h.dispose();
+});
+
+test("040 absent polling opt-in performs no idle periodic reads but keeps authenticated read refresh", async () => {
+  const h = bellHarness(channelHub(), false);
+  h.auth("account-a"); await h.clock.advance(0); await h.respond(8);
+  await h.clock.advance(3_600_000);
+  assert.equal(h.requests.length, 1);
+  h.window.dispatchEvent(new Event(NOTIFICATIONS_READ_EVENT));
+  await h.clock.advance(1000);
+  assert.equal(h.requests.length, 2);
+  assert.deepEqual(h.requests[1].filters[0], ["recipient_id", "account-a"]);
+  await h.respond(7);
+  h.auth(null); await h.clock.advance(120_000);
+  assert.equal(h.requests.length, 2);
+  h.dispose();
+});
+
+test("040 no opt-in does not schedule endless failure retries or discard confirmed state", async () => {
+  const clock=fakeClock(),states=[];let calls=0;
+  const controller=createNotificationRefreshController({periodicEnabled:false,clock,isVisible:()=>true,update:s=>states.push(s),load:async()=>{calls++;return calls===1?{count:5,error:null}:{count:null,error:new Error('temporary')};}});
+  controller.setIdentity('A');await clock.advance(0);
+  controller.refresh();await clock.advance(1000);
+  assert.equal(states.at(-1).count,5);assert.equal(states.at(-1).unavailable,true);
+  await clock.advance(3_600_000);assert.equal(calls,2);
+  controller.dispose();assert.equal(clock.size(),0);
 });

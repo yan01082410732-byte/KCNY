@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "codex/release-reporting-operations-034": false
+      "codex/release-reporting-operations-034": false,
+      "codex/release-community-20261030-040": false
     }
   }
 }

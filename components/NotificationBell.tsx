@@ -16,6 +16,9 @@ export function NotificationBell({ language }: { language: Language }) {
     const supabase = createClient();
     if (!supabase) { setSnapshot({ path: pathname, count: null, unavailable: true }); return; }
     const loader = createNotificationRefreshController({
+      // Periodic reads require an explicit build-time resource approval.
+      // Focus/read/visibility refresh and identity isolation remain available.
+      periodicEnabled: process.env.NEXT_PUBLIC_KCNY_NOTIFICATION_POLLING_ENABLED === "true",
       load: (recipientId, signal) => supabase.from("notifications")
         .select("id", { count: "exact", head: true })
         .eq("recipient_id", recipientId).is("read_at", null).abortSignal(signal),

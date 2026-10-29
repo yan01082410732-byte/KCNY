@@ -17,6 +17,7 @@ type Clock = {
  * Callers must pass the supplied signal to their transport.
  */
 export function createNotificationRefreshController(options: {
+  periodicEnabled?: boolean;
   load: (recipientId: string, signal: AbortSignal) => PromiseLike<CountResult>;
   update: (state: NotificationCountState) => void;
   isVisible: () => boolean;
@@ -107,7 +108,7 @@ export function createNotificationRefreshController(options: {
       if (active === request) active = null;
       if (!disposed && current === generation && eligible()) {
         if (pending) { pending = false; schedule(eventDelay()); }
-        else schedule(Math.min(NOTIFICATION_POLL_MS * 2 ** failures, NOTIFICATION_MAX_BACKOFF_MS));
+        else if (options.periodicEnabled !== false) schedule(Math.min(NOTIFICATION_POLL_MS * 2 ** failures, NOTIFICATION_MAX_BACKOFF_MS));
       }
     }
   }
