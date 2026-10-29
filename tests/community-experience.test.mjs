@@ -33,9 +33,9 @@ test("submission errors are bilingual and do not expose backend details", () => 
 test("server actions return failure state and only signal success after insert", () => {
   assert.match(action, /createComment\(_previous: CommentSubmitState, formData: FormData\)/);
   assert.match(action, /createCommentReply\(_previous: CommentSubmitState, formData: FormData\)/);
-  assert.match(action, /if \(error\) return \{ status: "error"/);
+  assert.match(action, /if \(error\) return commentRequestFailure/);
   assert.match(action, /revalidateCommentViews\(validation\.value\.postId\)/);
-  assert.match(action, /return \{ status: "success" \}/);
+  assert.match(action, /const result = commentRequestResult\(data, requestId\)/);
 });
 test("draft survives errors/remount and clears only on confirmed success", () => {
   assert.match(form, /sessionStorage\.getItem\(key\)/);

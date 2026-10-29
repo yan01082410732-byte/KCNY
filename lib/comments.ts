@@ -96,7 +96,13 @@ export function commentErrorMessage(error: unknown, language: CommentLanguage) {
     case "auth_required": return korean ? "로그인이 필요합니다. 작성한 내용은 이 탭에 보관됩니다." : "请先登录；草稿会保留在当前标签页。";
     case "invalid_post": return korean ? "게시글을 찾을 수 없습니다. 작성한 내용은 보관됩니다." : "帖子已不可用；草稿已保留。";
     case "permission": return korean ? "작성 권한이 없습니다. 작성한 내용은 보관됩니다." : "没有提交权限；草稿已保留。";
-    case "network_failed": return korean ? "연결 오류가 발생했습니다. 중복 게시를 피하려면 먼저 등록 여부를 확인해 주세요. 초안은 보관됩니다." : "网络异常。为避免重复发布，请先确认内容是否已出现；草稿仍保留。";
+    case "network_failed": return korean ? "연결 오류로 등록 결과를 확인하지 못했습니다. 결과를 확인하거나 같은 요청으로 재시도해 주세요. 원문은 보관됩니다." : "网络异常，提交结果尚不确定。请核对结果或使用原请求重试；原文已保留。";
+    case "request_not_found": return korean ? "아직 완료된 요청이 없습니다. 원래 요청 번호로 안전하게 재시도할 수 있습니다." : "尚未查到已完成的请求，可以使用原请求编号安全重试。";
+    case "request_conflict": return korean ? "이 요청 번호는 다른 내용에 이미 사용되었습니다. 원문을 보관했으며 새 댓글을 만들지 않았습니다." : "此请求编号已绑定其他内容，未创建新评论；原文已保留。";
+    case "request_deleted": return korean ? "이 요청으로 등록된 댓글은 이미 삭제되었습니다. 다시 생성하지 않으며 원문은 보관됩니다." : "此请求曾提交的评论已被删除，不会重新创建；原文已保留。";
+    case "request_storage_failed": return korean ? "이 탭에 복구 정보를 안전하게 보관할 수 없습니다. 원문을 복사해 보관하고 브라우저 저장 설정을 확인해 주세요." : "无法安全保存本标签页的恢复记录。请复制保留原文，并检查浏览器存储设置。";
+    case "account_changed": return korean ? "로그인 계정이 변경되었습니다. 원래 계정으로 돌아가 등록 결과를 확인해 주세요." : "登录账号已改变。请切回原账号核对本次提交结果。";
+    case "invalid_request": return korean ? "요청 번호가 올바르지 않습니다. 원문을 보관했습니다." : "请求编号无效，原文已保留。";
     case "invalid_parent_comment":
     case "reply_failed": return korean ? "답글을 등록하지 못했습니다. 원 댓글을 확인하고 다시 시도해 주세요." : "回复失败，请确认父评论仍可用后重试。";
     case "delete_comment_failed": return korean ? "댓글을 삭제하지 못했습니다. 다시 시도해 주세요." : "删除评论失败，请重试。";
