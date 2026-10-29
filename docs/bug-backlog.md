@@ -270,3 +270,17 @@ One read-only affected-boundary/React retrospective; no unrelated repair loop. B
 | READY-033-05 | Production approval gate — NOT an ordinary bug | A signed self-confirmation receipt is not a role grant or verified ownership approval. Real production owner UUID binding, approved policy/hold rules, responsible management operator, secure access/correction fulfillment and separate migration/application/enablement authorization remain explicit gates. A completed policy draft does not satisfy those decisions; no fake fulfillment, guessed account grant or automatic clearing. |
 
 Source review found no confirmed new critical authorization, privacy, data-loss or core-flow defect in the binding boundary. Fresh confirmed non-anonymous identity, default-off exact environment gating, controlled consent, duplicate guard, timer cleanup, escaped output, readonly receipt and no client secret/browser persistence were checked. Final browser batch status belongs to its actual evidence, not this source review. No DB write, grant, production enablement or AI call was performed by this retrospective.
+
+# Community batch036–038 — 2026-10-29
+
+One targeted retrospective only; historical reports/failures remain unchanged.
+
+| ID | Class / status | Finding |
+|---|---|---|
+| COMMUNITY-036-01 | Core correctness — FIXED | Old relationship query returned1000 of1005 follows. Authenticated invoker keyset RPC returns all61 matching synthetic posts in4 pages, no duplicate and no caller-selected follower. |
+| COMMUNITY-037-01 | Retry integrity — delivered | Atomic user/request journal, original payload hash, confirmed lookup and deletion tombstones prevent duplicate comment/notification or accidental resurrection. No weakened comments RLS. |
+| COMMUNITY-037-02 | Non-critical UX / deferred | Deleted/conflicting request preserves original text and avoids blind fresh-ID submission. An explicit new-draft workflow after terminal outcomes could be clearer. Naturally expired signed-session real test and following-database outage/recovery remain unexecuted acceptance cases, not PASS. |
+| COMMUNITY-038-01 | Core runtime blocker — FIXED | Native Window timer functions used as clock-object methods threw Illegal invocation. Lexical wrappers fixed actual Chromium initialization; separate9/9 real browser run passes. Original failure retained. |
+| COMMUNITY-038-02 | Bounded scale tradeoff / deferred | Polling is per visible authenticated tab, not one leader per browser.25s baseline,10s timeout,120s max backoff. No Realtime or guaranteed instant delivery; future high-volume load review needed. |
+| COMMUNITY-038-03 | Non-critical / deferred | Real iPad/Safari PENDING; webpack cache serialization and existing Node module-type warnings do not fail final build/tests. New receipt metadata retention needs a future reviewed policy, not blind tombstone deletion. |
+| COMMUNITY-TEST-01 | Evidence preserved | 037 original7/8, first locator recheck0/1, final1/1;038 failed bootstrap then9/9; first full suite683/684 obsolete assertion, final684/684. No failed history rewritten. |
